@@ -21,12 +21,12 @@ class User extends Model implements JWTSubject, AuthenticatableContract, Authori
     protected $fillable = [
         'username', 'email','password',
     ];
-  //  protected $connection = 'mysql';
-  //  protected $guarded = ['id'];
-/*public static $rules = [
+    protected $connection = 'mysql';
+    protected $guarded = ['id'];
+    public static $rules = [
 	'username'=>'required',
 	'email'=>'required | unique',
-	'password'=>'required'];*/ 
+	'password'=>'required'];
     /**
      * The attributes excluded from the model's JSON form.
      *
