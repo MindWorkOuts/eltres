@@ -4,9 +4,11 @@ package com.mindworkouts.org.appeltres;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -26,9 +28,12 @@ public class ActivityPlaying extends Activity implements
         private Render render;
         private MainThread thread;
         private Canvas c;
+        private boolean beenTouched = false;
+        private float touchX = 0;
+        private float touchY = 0;
 
 
-        public NotificationManager notificationManager;
+    public NotificationManager notificationManager;
         public TelephonyManager telephonyManager;
         public PhoneStateListener listener;
         public boolean truca;
@@ -36,8 +41,16 @@ public class ActivityPlaying extends Activity implements
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
             initVariables();
             setContentView(render);
+
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int y = displayMetrics.heightPixels;
+            int x = displayMetrics.widthPixels;
+            Constants.SCREEN_HEIGTH_TOTAL = y;
+            Constants.SCREEN_WIDTH_TOTAL = x;
         }
 
         private void initVariables() {
@@ -73,7 +86,19 @@ public class ActivityPlaying extends Activity implements
             }
         }
 
+        public boolean touchDone(){
+            return this.beenTouched;
+        }
+        public float getTouchX(){return this.touchX;}
+        public float getTouchY(){return this.touchY;}
+
         public boolean onTouchEvent(MotionEvent event) {
+            this.touchX = event.getX();
+            this.touchY = event.getY();
+            System.out.println(event.getX());
+            this.beenTouched = true;
+            if(event.getAction()==MotionEvent.ACTION_UP)
+                beenTouched = false;
             return super.onTouchEvent(event);
         }
 

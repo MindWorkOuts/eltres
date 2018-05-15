@@ -5,10 +5,11 @@ import android.graphics.Rect;
 import com.mindworkouts.org.appeltres.Constants;
 
     public class Card extends Entity{
-
-        public Card(int width, int height, int x, int y) {
+        private int value = 0;
+        public Card(int width, int height, int x, int y, int value) {
             super(width, height, x, y);
             super.setSpeed(Constants.CARD_SPEED);
+            this.value = value;
         }
 
         public Rect getRectNextYPosition(double angle, double restitution) {
@@ -32,5 +33,6 @@ import com.mindworkouts.org.appeltres.Constants;
         public void setNextYPosition(int newY) {
             super.setPositionY(newY);
         }
+        public int getValue(){return this.value;}
 }
 

@@ -17,8 +17,8 @@ public class Entity {
     public Entity(int width, int height, int x, int y) {
         this.width = width;
         this.height = height;//(int)(height*(1-Constants.SCREEN_MARGIN_SCALE))+Constants.SCREEN_MARGIN_HEIGTH/2;
-        this.positionX = x+ Constants.SCREEN_MARGIN_WIDTH/2;
-        this.positionY = y+Constants.SCREEN_MARGIN_HEIGTH/2;
+        this.positionX = x;
+        this.positionY = y;
         rect = new Rect(getPositionX(), getPositionY(), getPositionX() + getWidth(), getPositionY() + getHeight());
     }
     //si esa posición x, teniendo en cuenta el ancho está dentro de la pantalla retorna true

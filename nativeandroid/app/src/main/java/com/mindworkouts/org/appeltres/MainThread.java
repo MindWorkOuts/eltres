@@ -41,6 +41,11 @@ public class MainThread extends Thread {
                 this.canvas = this.surfaceHolder.lockCanvas();
                 synchronized (this.surfaceHolder){
                     if (this.canvas != null) {
+                        if (this.iga.touchDone()){
+                            this.render.updateTouch(this.iga.getTouchX(),this.iga.getTouchY());
+                        }
+                        else
+                            this.render.disableTouchCardPointer();
                         this.render.draw(this.canvas, p);
                     }
                 }
