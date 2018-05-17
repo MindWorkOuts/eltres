@@ -22,6 +22,7 @@ public class MainThread extends Thread {
         super();
         this.surfaceHolder = surfaceHolder;
         this.render = render;
+        render.refreshConstants();
         this.iga = iga;
         this.controller = controller;
     }
@@ -36,6 +37,9 @@ public class MainThread extends Thread {
         int frameCount = 0;
         long totalTime = 0;
         long targetTime = 1000 / Constants.MAX_FPS;
+        long scrollTimeout = 8;
+        long scrollCount= 0;
+        boolean reachedTimeoutScroll = false;
         Point p=new Point();
         while(running){
             startTime = System.nanoTime();
@@ -44,11 +48,19 @@ public class MainThread extends Thread {
                 this.canvas = this.surfaceHolder.lockCanvas();
                 synchronized (this.surfaceHolder){
                     if (this.canvas != null) {
-                        if (this.iga.touchDone()){
-                            this.controller.updateTouch(this.iga.getTouchX(),this.iga.getTouchY());
+                        if(reachedTimeoutScroll){
+                            reachedTimeoutScroll = false;
+                            render.refreshConstants();
+                            this.controller.swapHand(iga.isScrolling());
                         }
-                        else
+                        else if (this.iga.touchDone() && iga.isScrolling()==0){
+                            render.refreshConstants();
+                            this.controller.updateTouch((int)this.iga.getTouchX(),(int)this.iga.getTouchY());
+                        }
+                        else {
+                            render.refreshConstants();
                             this.controller.cardTouchReleased();
+                        }
                         this.render.draw(this.canvas, p);
                     }
                 }
@@ -65,8 +77,8 @@ public class MainThread extends Thread {
             }
 
             timeMilliSeconds = (System.nanoTime() - startTime)/ 1000000; //miliseconds
-            waitTime = targetTime - timeMilliSeconds;
 
+            waitTime = targetTime - timeMilliSeconds;
             try{
                 if(waitTime > 0)
                     this.sleep(waitTime);
@@ -76,10 +88,23 @@ public class MainThread extends Thread {
 
             totalTime = totalTime + System.nanoTime() - startTime;
             frameCount = frameCount + 1;
+            if(iga.isScrolling()!=0) {
+                scrollCount += 1;
+                if (scrollCount >= scrollTimeout) {
+                    scrollCount =-8;
+                    reachedTimeoutScroll = true;
+                }
+            }else scrollCount=0;
+
             if(frameCount == Constants.MAX_FPS){
                 frameCount = 0;
                 totalTime = 0;
             }
         }
+    }
+    //where = -1 <---- left
+    //where = +1 <---- right
+    public void swapHand(int where){
+
     }
 }

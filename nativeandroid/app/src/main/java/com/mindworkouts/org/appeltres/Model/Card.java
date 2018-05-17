@@ -1,13 +1,21 @@
 package com.mindworkouts.org.appeltres.Model;
 
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 
 import com.mindworkouts.org.appeltres.Constants;
 
     public class Card extends Entity{
         private int value = 0;
+        private int staticX = 0;
+        private int staticY = 0;
         public Card(int width, int height, int x, int y, int value) {
             super(width, height, x, y);
+            this.staticX = x;
+            this.staticY = y;
+            this.setNextXPosition(staticX);
+            this.setNextYPosition(staticY);
             super.setSpeed(Constants.CARD_SPEED);
             this.value = value;
         }
@@ -26,6 +34,9 @@ import com.mindworkouts.org.appeltres.Constants;
             return pos;
         }
 
+        public int getStaticY() {return this.staticY;}
+        public int getStaticX() {return this.staticX;}
+
         public void setNextXPosition(int newX) {
             super.setPositionX(newX);
         }
@@ -33,6 +44,11 @@ import com.mindworkouts.org.appeltres.Constants;
         public void setNextYPosition(int newY) {
             super.setPositionY(newY);
         }
-        public int getValue(){return this.value;}
+        public void setStaticX(int newX) {
+            this.staticX=newX;
+        }
+        public void setStaticY(int newY) {
+            this.staticY=newY;
+        }public int getValue(){return this.value;}
 }
 

@@ -4,7 +4,6 @@ package com.mindworkouts.org.appeltres;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.graphics.Canvas;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -16,8 +15,10 @@ import android.view.View;
 import android.widget.Button;
 
 import com.mindworkouts.org.appeltres.Constants;
-import com.mindworkouts.org.appeltres.MainThread;
-import com.mindworkouts.org.appeltres.Render;
+import com.mindworkouts.org.appeltres.Controller.Controller;
+import com.mindworkouts.org.appeltres.Controller.MainThread;
+import com.mindworkouts.org.appeltres.Model.Player;
+import com.mindworkouts.org.appeltres.View.Render;
 
 
 public class ActivityPlaying extends Activity implements
@@ -29,8 +30,12 @@ public class ActivityPlaying extends Activity implements
         private MainThread thread;
         private Canvas c;
         private boolean beenTouched = false;
-        private float touchX = 0;
-        private float touchY = 0;
+        private float currentX = 0;
+        private float currentY = 0;
+        private float downX = 0;
+        private float downY = 0;
+        private boolean touchUp = true;
+        private Controller controller;
 
 
     public NotificationManager notificationManager;
@@ -41,30 +46,45 @@ public class ActivityPlaying extends Activity implements
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
-            initVariables();
-            setContentView(render);
-
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int y = displayMetrics.heightPixels;
             int x = displayMetrics.widthPixels;
             Constants.SCREEN_HEIGTH_TOTAL = y;
             Constants.SCREEN_WIDTH_TOTAL = x;
+            Constants.SCREEN_HEIGTH = y;
+            Constants.SCREEN_WIDTH = x;
+            int [][] pos= {{Constants.SCREEN_WIDTH_TOTAL/2 - (int)(2.86f*Constants.CARD_WIDTH/2),
+                    Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
+
+                    {Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_WIDTH/2,
+                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
+
+                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2,
+                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4}};
+
+            Constants.THREE_CARDS_XY = pos;
+            initVariables();
+            setContentView(render);
+            render.refreshConstants();
+            controller.initGame();
         }
 
         private void initVariables() {
             thread=null;
             render=null;
             System.gc();
-            render = new Render(this.getApplicationContext());
-            this.thread = new MainThread(this.render.getHolder(), this.render, this);
+            controller = new Controller();
+            int [] values = {7,2,1,3,4,5,6};
+            controller.createPlayer(new Player(values));
+            render = new Render(this.getApplicationContext(), controller);
+            this.thread = new MainThread(this.render.getHolder(), this.render, this, controller);
             this.thread.setRunning(true);
             this.thread.start();
         }
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            this.thread = new MainThread(this.render.getHolder(), this.render, this);
+            this.thread = new MainThread(this.render.getHolder(), this.render, this, controller);
             this.thread.setRunning(true);
             this.thread.start();
         }
@@ -89,16 +109,62 @@ public class ActivityPlaying extends Activity implements
         public boolean touchDone(){
             return this.beenTouched;
         }
-        public float getTouchX(){return this.touchX;}
-        public float getTouchY(){return this.touchY;}
+        public boolean doubleTouchUp(){
+            return this.touchUp;
+        }
+        public int isScrolling(){
+            //TODO: if touch is inside area of cards to scroll
+            if(!touchUp){
+                if (Math.abs(downX - currentX) > Math.abs(downY
+                        - currentY)) {
+                    //RIGHT
+                    if (downX < currentX) {
+                        return 1;
+                    }
+                    //LEFT
+                    if (downX > currentX) {
+                        return -1;
+                    }
+                    this.beenTouched = true;
+
+                /* else {
+                    Log.v("", "y ");
+
+                    if (downYValue < currentY) {
+                        Log.v("", "down");
+
+                    }
+                    if (downYValue > currentY) {
+                        Log.v("", "up");
+
+                    }
+                }
+                break;
+            }*/
+                }
+            }
+            return 0;
+        }
+        public float getTouchX(){return this.currentX;}
+        public float getTouchY(){return this.currentY;}
 
         public boolean onTouchEvent(MotionEvent event) {
-            this.touchX = event.getX();
-            this.touchY = event.getY();
-            System.out.println(event.getX());
+            this.currentX = event.getX();
+            this.currentY = event.getY();
             this.beenTouched = true;
-            if(event.getAction()==MotionEvent.ACTION_UP)
+            if(event.getAction()==MotionEvent.ACTION_UP || event.getAction()==MotionEvent.ACTION_CANCEL){
                 beenTouched = false;
+                downX=0;
+                downY=0;
+                touchUp=true;
+            }
+            else
+                touchUp = false;
+            if(event.getAction()==MotionEvent.ACTION_DOWN){
+                downX=currentX;
+                downY=currentY;
+            }
+            render.invalidate();
             return super.onTouchEvent(event);
         }
 

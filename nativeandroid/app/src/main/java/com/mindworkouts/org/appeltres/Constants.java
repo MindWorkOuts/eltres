@@ -1,6 +1,9 @@
 package com.mindworkouts.org.appeltres;
 
+import android.graphics.Matrix;
 import android.graphics.Rect;
+
+import static java.lang.Math.sqrt;
 
 public class Constants {
     public static final int MAX_FPS = 30;
@@ -10,8 +13,12 @@ public class Constants {
     public static int SCREEN_HEIGTH_TOTAL;
     public static int SCREEN_WIDTH;
     public static int SCREEN_HEIGTH;
-    public static int DOOR_WIDTH;
-    public static int CELDA_WIDTH;
+    public static int CARD_HEIGTH = 250;
+    public static int CARD_WIDTH = 192;
+    public static Matrix LEFT_CARD_MATRIX;
+    public static Matrix RIGHT_CARD_MATRIX;
+    public static Matrix CENTER_CARD_MATRIX;
+    public static Matrix[] HAND_CARD_MATRIX;
     public static int CELDA_HEIGTH;
     public static float SCREEN_MARGIN_SCALE = 0.2f;
     public static final int BULLET_SPEED_HERO = 30;
@@ -20,7 +27,7 @@ public class Constants {
     public static final int HERO_DEFAULT_SHOOT_DELAY = 10;
     public static int HERO_SHOOT_DELAY = 8;
     public static final int BULLET_DAMAGE = 20;
-    public static final int CARD_SPEED = 20;
+    public static final int CARD_SPEED = 40;
     public static final int NUM_CELDAS_HORIZONTAL = 9;
     public static final int NUM_CELDAS_VERTICAL = 16;
     public static final char SIMBOLO_SUELO = '0';
@@ -51,4 +58,16 @@ public class Constants {
     public static final int MAX_HEALTH = 100;
     public static final int MAX_SPEED = 100;
     public static final int MAX_FIRERATE = 5;
+    public static int THREE_CARDS_XY[][] = new int[3][2];
+    public static double[] normalize(int x, int y){
+        double len = sqrt(x*x+y*y);
+        if (len>0){
+            double auxx = (double) (x)/len;
+            double auxy = (double) (y)/len;
+            double [] norm = {auxx,auxy};
+            return norm;
+        }
+        double [] norm = {x,y};
+        return norm;
+    }
 }

@@ -14,8 +14,9 @@ public class Controller {
     public Controller(){
     }
     public void initGame(){
-        int [] values = {4};
-        this.mainPlayer = new Player(values);
+    }
+    public void createPlayer(Player player){
+        this.mainPlayer = player;
     }
 
     public int getTouchCardPointer(){return this.touchCardPointer;}
@@ -23,15 +24,17 @@ public class Controller {
         this.touchCardPointer=-1;
         this.mainPlayer.resetCardsPosition();
     }
-    public void updateTouch (float x, float y){
+    public void updateTouch (int x, int y){
+
        if(getTouchCardPointer()!=-1){
-            this.mainPlayer.updateCardPosition(getTouchCardPointer(), (int) x, (int) y);
+           Card card = this.mainPlayer.getHandCards().get(getTouchCardPointer());
+            this.mainPlayer.updateCardPosition(getTouchCardPointer(), x-card.getRect().width()/2, (int) y-card.getRect().height()/2);
         }
         else {
             ArrayList<Card> playerHand = mainPlayer.getHandCards();
-            for (int i = 0; i < playerHand.size(); i++) {
+            for (int i = playerHand.size()-1; i >= 0; i--) {
                 Card card = playerHand.get(i);
-                if (card.getRect().contains((int) x, (int) y)) {
+                if (card.getRect().contains( x, y)) {
                     this.mainPlayer.updateCardPosition(i, (int) x-card.getRect().width()/2, (int) y-card.getRect().height()/2);
                     this.touchCardPointer = i;
                 }
@@ -50,4 +53,5 @@ public class Controller {
     public ArrayList<Card> getPlayerHand(){
         return mainPlayer.getHandCards();
     }
+    public void swapHand(int where){this.mainPlayer.swapHand(where);}
 }
