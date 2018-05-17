@@ -11,7 +11,8 @@ import java.util.ArrayList;
 public class Player {//extends Entity{
 
     private ArrayList<Card> handCards = new ArrayList<Card>();
-    private int [] targetCards = {0,1,2};
+    private int [] targetCards;
+    private int targetCardsSize = 0;
 
 
     public Player(/*int width, int height, int x, int y, */int[] vals) {
@@ -19,11 +20,14 @@ public class Player {//extends Entity{
         //TODO: iterate and set each final position, handCards position,
         //table cards position.
         int i;
-        for(i = 0; i < 3 && i < vals.length; i++){
-            this.handCards.add(new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,Constants.THREE_CARDS_XY[i][0], Constants.THREE_CARDS_XY[i][1], vals[i]));
+        this.targetCards= new int[5];
+        for(i = 0; i < 5 && i < vals.length; i++){
+            targetCards[i]= i;
+            this.targetCardsSize+=1;
+            this.handCards.add(new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,Constants.HAND_CARDS_XY[i][0], Constants.HAND_CARDS_XY[i][1], vals[i]));
         }
-        if(vals.length > 3){
-            for(i = 3; i < vals.length; i++){
+        if(vals.length > 5){
+            for(i = 5; i < vals.length; i++){
                 this.handCards.add(new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,0,0, vals[i]));
             }
         }
@@ -53,21 +57,21 @@ public class Player {//extends Entity{
     public void swapHand(int direction){
         //si hay mas cartas a la izquierda o a la derecha mueve
         //if evita retornar nulls
-        if(direction+targetCards[0]>=0 && direction+targetCards[2]<handCards.size()){
-            for (int i = 0 ; i < this.targetCards.length; i++) {
+        int max = Math.min(handCards.size(), this.targetCardsSize-1);
+        if(direction+targetCards[0]>=0 && direction+targetCards[max]<handCards.size()){
+            for (int i = 0 ; i < targetCardsSize; i++) {
                 targetCards[i] = targetCards[i] + direction;
-                this.handCards.get(targetCards[i]).setNextXPosition(Constants.THREE_CARDS_XY[i][0]);
-                this.handCards.get(targetCards[i]).setNextYPosition(Constants.THREE_CARDS_XY[i][1]);
-                this.handCards.get(targetCards[i]).setStaticX(Constants.THREE_CARDS_XY[i][0]);
-                this.handCards.get(targetCards[i]).setStaticY(Constants.THREE_CARDS_XY[i][1]);
-
+                this.handCards.get(targetCards[i]).setNextXPosition(Constants.HAND_CARDS_XY[i][0]);
+                this.handCards.get(targetCards[i]).setNextYPosition(Constants.HAND_CARDS_XY[i][1]);
+                this.handCards.get(targetCards[i]).setStaticX(Constants.HAND_CARDS_XY[i][0]);
+                this.handCards.get(targetCards[i]).setStaticY(Constants.HAND_CARDS_XY[i][1]);
             }
         }
     }
 
     public ArrayList<Card> getHandCards() {
         ArrayList<Card> handVisible = new ArrayList<>();
-        for (int i = 0 ; i < this.targetCards.length; i++) {
+        for (int i = 0 ; i < targetCardsSize; i++) {
             handVisible.add(handCards.get(targetCards[i]));
         }
         return handVisible;

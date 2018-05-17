@@ -35,9 +35,11 @@ public class Render extends SurfaceView {
     }
     public void refreshConstants(){
         ArrayList <Card> playerHand = controller.getPlayerHand();
+        int degrees = 340;
+        Constants.HAND_CARD_MATRIX = new Matrix[5];
         for (int i = 0; i < playerHand.size(); i++){
             Card card = playerHand.get(i);
-            int positionX = card.getPositionX();;
+            int positionX = card.getPositionX();
             int positionY = card.getPositionY();
 
             int bWidth = this.cardsBitmap.get(card.getValue()).getWidth();
@@ -47,23 +49,16 @@ public class Render extends SurfaceView {
             Matrix matrix = new Matrix();
             matrix.setScale(scaleWidth, scaleHeight);
             matrix.postTranslate(positionX,positionY);
-            int degrees = 340;
             if(i==0){
-                matrix.postTranslate(0,-(float)Math.sin((double)degrees*Math.PI/180)*card.getWidth());
-
+                matrix.postTranslate(0,-((float)Math.sin((double)degrees*Math.PI/180)*card.getWidth()));
             }
-            if(i==1)degrees=0;
-            else if (i==2)degrees=20;
+            if(i==1){
+                matrix.postTranslate(0,-(float)Math.sin((double)degrees*Math.PI/180)*card.getWidth()/2);
+            }
             matrix.preRotate(degrees);
-
-            if(i==0)Constants.LEFT_CARD_MATRIX=matrix;
-            if(i==1)Constants.CENTER_CARD_MATRIX=matrix;
-            if(i==2)Constants.RIGHT_CARD_MATRIX=matrix;
+            Constants.HAND_CARD_MATRIX[i] = matrix;
+            degrees+=10;
         }
-        Constants.HAND_CARD_MATRIX = new Matrix[3];
-        Constants.HAND_CARD_MATRIX[0] = Constants.LEFT_CARD_MATRIX;
-        Constants.HAND_CARD_MATRIX[1] = Constants.CENTER_CARD_MATRIX;
-        Constants.HAND_CARD_MATRIX[2] = Constants.RIGHT_CARD_MATRIX;
 
     }
     public void draw(Canvas canvas, Point p) {

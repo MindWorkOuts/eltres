@@ -58,7 +58,7 @@ public class Constants {
     public static final int MAX_HEALTH = 100;
     public static final int MAX_SPEED = 100;
     public static final int MAX_FIRERATE = 5;
-    public static int THREE_CARDS_XY[][] = new int[3][2];
+    public static int HAND_CARDS_XY[][] = new int[5][2];
     public static double[] normalize(int x, int y){
         double len = sqrt(x*x+y*y);
         if (len>0){

@@ -54,16 +54,31 @@ public class ActivityPlaying extends Activity implements
             Constants.SCREEN_WIDTH_TOTAL = x;
             Constants.SCREEN_HEIGTH = y;
             Constants.SCREEN_WIDTH = x;
-            int [][] pos= {{Constants.SCREEN_WIDTH_TOTAL/2 - (int)(2.86f*Constants.CARD_WIDTH/2),
-                    Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
+            int xTranslation = (int)(0.8*Constants.CARD_WIDTH);
+            int yTranslation = (int)(0.07*Constants.CARD_HEIGTH);
+            int [][] pos= {
+                    //IZQUIERDA MAX
+                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,
+                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
 
+                    //CENTRO IZQUIERDA
+                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (int)(xTranslation) ,
+                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
+
+                    //CENTRO
                     {Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_WIDTH/2,
                             Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
 
+                    //CENTRO DERECHA
                     {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2,
-                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4}};
+                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4-yTranslation},
 
-            Constants.THREE_CARDS_XY = pos;
+                    //DERECHA MAX, SI HAY MÁS DE 4 CARTAS
+                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,
+                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4-yTranslation/2}
+            };
+
+            Constants.HAND_CARDS_XY = pos;
             initVariables();
             setContentView(render);
             render.refreshConstants();
@@ -75,7 +90,7 @@ public class ActivityPlaying extends Activity implements
             render=null;
             System.gc();
             controller = new Controller();
-            int [] values = {7,2,1,3,4,5,6};
+            int [] values = {7,2,1,3,6,8,9};
             controller.createPlayer(new Player(values));
             render = new Render(this.getApplicationContext(), controller);
             this.thread = new MainThread(this.render.getHolder(), this.render, this, controller);
@@ -119,11 +134,11 @@ public class ActivityPlaying extends Activity implements
                         - currentY)) {
                     //RIGHT
                     if (downX < currentX) {
-                        return 1;
+                        return -1;
                     }
                     //LEFT
                     if (downX > currentX) {
-                        return -1;
+                        return 1;
                     }
                     this.beenTouched = true;
 
