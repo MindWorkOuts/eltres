@@ -10,6 +10,7 @@ import com.mindworkouts.org.appeltres.Constants;
         private int value = 0;
         private int staticX = 0;
         private int staticY = 0;
+        private boolean focusing = false;
         public Card(int width, int height, int x, int y, int value) {
             super(width, height, x, y);
             this.staticX = x;
@@ -39,6 +40,12 @@ import com.mindworkouts.org.appeltres.Constants;
 
         public void setNextXPosition(int newX) {
             super.setPositionX(newX);
+        }
+        public void setFocus(boolean is) {
+            this.focusing=is;
+        }
+        public boolean isFocusing() {
+            return focusing;
         }
 
         public void setNextYPosition(int newY) {

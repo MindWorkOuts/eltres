@@ -4,6 +4,7 @@ package com.mindworkouts.org.appeltres;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -58,30 +59,32 @@ public class ActivityPlaying extends Activity implements
             int yTranslation = (int)(0.07*Constants.CARD_HEIGTH);
             int [][] pos= {
                     //IZQUIERDA MAX
-                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,
-                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
+                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
 
                     //CENTRO IZQUIERDA
-                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (int)(xTranslation) ,
-                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
+                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation) ,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
 
                     //CENTRO
-                    {Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_WIDTH/2,
-                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4},
+                    {Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_WIDTH/2,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
 
                     //CENTRO DERECHA
-                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2,
-                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4-yTranslation},
+                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR-yTranslation)},
 
                     //DERECHA MAX, SI HAY MÁS DE 4 CARTAS
-                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,
-                            Constants.SCREEN_HEIGTH_TOTAL-3*Constants.CARD_HEIGTH/4-yTranslation/2}
+                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR-yTranslation/2)}
             };
 
             Constants.HAND_CARDS_XY = pos;
+            Constants.HAND_PANEL = new Rect(0,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH,Constants.SCREEN_WIDTH_TOTAL,Constants.SCREEN_HEIGTH_TOTAL);
+
             initVariables();
             setContentView(render);
-            render.refreshConstants();
+            render.refreshMatrixs();
             controller.initGame();
         }
 
@@ -89,8 +92,8 @@ public class ActivityPlaying extends Activity implements
             thread=null;
             render=null;
             System.gc();
-            controller = new Controller();
-            int [] values = {7,2,1,3,6,8,9};
+            controller = new Controller(getApplicationContext());
+            int [] values = {7,2,1,4,6,12,8};
             controller.createPlayer(new Player(values));
             render = new Render(this.getApplicationContext(), controller);
             this.thread = new MainThread(this.render.getHolder(), this.render, this, controller);
@@ -129,7 +132,7 @@ public class ActivityPlaying extends Activity implements
         }
         public int isScrolling(){
             //TODO: if touch is inside area of cards to scroll
-            if(!touchUp){
+            if(!touchUp && Constants.HAND_PANEL.contains((int)this.currentX,(int)this.currentY)){
                 if (Math.abs(downX - currentX) > Math.abs(downY
                         - currentY)) {
                     //RIGHT

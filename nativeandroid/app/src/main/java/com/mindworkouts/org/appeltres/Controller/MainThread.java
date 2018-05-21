@@ -22,7 +22,7 @@ public class MainThread extends Thread {
         super();
         this.surfaceHolder = surfaceHolder;
         this.render = render;
-        render.refreshConstants();
+        render.refreshMatrixs();
         this.iga = iga;
         this.controller = controller;
     }
@@ -37,10 +37,12 @@ public class MainThread extends Thread {
         int frameCount = 0;
         long totalTime = 0;
         long targetTime = 1000 / Constants.MAX_FPS;
-        long scrollTimeout = 8;
+        long scrollTimeout = 3;
         long scrollCount= 0;
         boolean reachedTimeoutScroll = false;
         Point p=new Point();
+        p.x=0;
+        p.y=0;
         while(running){
             startTime = System.nanoTime();
             this.canvas = null;
@@ -50,15 +52,15 @@ public class MainThread extends Thread {
                     if (this.canvas != null) {
                         if(reachedTimeoutScroll){
                             reachedTimeoutScroll = false;
-                            render.refreshConstants();
-                            this.controller.swapHand(iga.isScrolling());
+                            render.refreshMatrixs();
+                            this.controller.scrollHand(iga.isScrolling());
                         }
                         else if (this.iga.touchDone() && iga.isScrolling()==0){
-                            render.refreshConstants();
+                            render.refreshMatrixs();
                             this.controller.updateTouch((int)this.iga.getTouchX(),(int)this.iga.getTouchY());
                         }
                         else {
-                            render.refreshConstants();
+                            render.refreshMatrixs();
                             this.controller.cardTouchReleased();
                         }
                         this.render.draw(this.canvas, p);
@@ -88,6 +90,7 @@ public class MainThread extends Thread {
 
             totalTime = totalTime + System.nanoTime() - startTime;
             frameCount = frameCount + 1;
+            if(frameCount==Constants.MAX_FPS){p.y=p.y+1;}
             if(iga.isScrolling()!=0) {
                 scrollCount += 1;
                 if (scrollCount >= scrollTimeout) {

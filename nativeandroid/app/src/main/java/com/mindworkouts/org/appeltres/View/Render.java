@@ -33,11 +33,11 @@ public class Render extends SurfaceView {
         this.controller = controller;
 
     }
-    public void refreshConstants(){
-        ArrayList <Card> playerHand = controller.getPlayerHand();
-        int degrees = 340;
+    public void refreshMatrixs(){
+    ArrayList <Card> playerHand = controller.getVisiblePlayerHand();
+        int degrees [] = {340,350,0,10,20};
         Constants.HAND_CARD_MATRIX = new Matrix[5];
-        for (int i = 0; i < playerHand.size(); i++){
+        for (int i = 0; i < playerHand.size() && i < Constants.MAX_CARDS_SEEN; i++){
             Card card = playerHand.get(i);
             int positionX = card.getPositionX();
             int positionY = card.getPositionY();
@@ -49,45 +49,25 @@ public class Render extends SurfaceView {
             Matrix matrix = new Matrix();
             matrix.setScale(scaleWidth, scaleHeight);
             matrix.postTranslate(positionX,positionY);
-            if(i==0){
-                matrix.postTranslate(0,-((float)Math.sin((double)degrees*Math.PI/180)*card.getWidth()));
+            if(degrees[i]==degrees[0]){
+                matrix.postTranslate(0,-((float)Math.sin((double)degrees[i]*Math.PI/180)*0.8f*card.getWidth()));
             }
-            if(i==1){
-                matrix.postTranslate(0,-(float)Math.sin((double)degrees*Math.PI/180)*card.getWidth()/2);
+            else if(degrees[i]==degrees[1]){
+                matrix.postTranslate(0,-(float)Math.sin((double)degrees[i]*Math.PI/180)*0.9f*card.getWidth()/2);
             }
-            matrix.preRotate(degrees);
+            matrix.preRotate(degrees[i]);
             Constants.HAND_CARD_MATRIX[i] = matrix;
-            degrees+=10;
         }
 
     }
     public void draw(Canvas canvas, Point p) {
         canvas.drawBitmap(this.background,new Rect(0,0,background.getWidth(),background.getHeight()),new Rect(0,0, Constants.SCREEN_WIDTH_TOTAL,Constants.SCREEN_HEIGTH_TOTAL),color);
-        ArrayList<Card> playerHand = controller.getPlayerHand();
-        for (int i = 0; i < playerHand.size(); i++){
+        ArrayList<Card> playerHand = controller.getVisiblePlayerHand();
+        for (int i = 0; i < playerHand.size() && i < Constants.MAX_CARDS_SEEN; i++){
             Card card = playerHand.get(i);
             Bitmap bitmapCard = this.cardsBitmap.get(card.getValue());
             canvas.drawBitmap(bitmapCard,Constants.HAND_CARD_MATRIX[i], null);
-            /*
-        int width = bitmapOrg.getWidth();
-        int height = bitmapOrg.getHeight();
-        int newWidth = 200;
-        int newHeight = 200;
-
-        // calculate the scale - in this case = 0.4f
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-
-        // createa matrix for the manipulation
-        Matrix matrix = new Matrix();
-        // resize the bit map
-        matrix.postScale(scaleWidth, scaleHeight);
-        // rotate the Bitmap
-        matrix.postRotate(45);
-            */
-
-            //
-
+            canvas.drawText(""+p.x+":"+p.y,Constants.SCREEN_WIDTH_TOTAL/2,Constants.SCREEN_HEIGTH_TOTAL/2,color);
         }
     }
     private void initBitmaps(){

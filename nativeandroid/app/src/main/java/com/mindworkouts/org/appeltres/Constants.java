@@ -3,6 +3,8 @@ package com.mindworkouts.org.appeltres;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 
+import java.util.ArrayList;
+
 import static java.lang.Math.sqrt;
 
 public class Constants {
@@ -19,6 +21,9 @@ public class Constants {
     public static Matrix RIGHT_CARD_MATRIX;
     public static Matrix CENTER_CARD_MATRIX;
     public static Matrix[] HAND_CARD_MATRIX;
+    public static ArrayList<Matrix> STATIC_HAND_MATRIX;
+    //% hidding of height card
+    public static final float HIDDING_CARDS_FACTOR = 0.33f;
     public static int CELDA_HEIGTH;
     public static float SCREEN_MARGIN_SCALE = 0.2f;
     public static final int BULLET_SPEED_HERO = 30;
@@ -59,6 +64,7 @@ public class Constants {
     public static final int MAX_SPEED = 100;
     public static final int MAX_FIRERATE = 5;
     public static int HAND_CARDS_XY[][] = new int[5][2];
+    public static int MAX_CARDS_SEEN = 5;
     public static double[] normalize(int x, int y){
         double len = sqrt(x*x+y*y);
         if (len>0){
@@ -70,4 +76,5 @@ public class Constants {
         double [] norm = {x,y};
         return norm;
     }
+    public static Rect HAND_PANEL;
 }
