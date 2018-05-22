@@ -7,6 +7,7 @@ import android.view.SurfaceHolder;
 
 import com.mindworkouts.org.appeltres.Constants;
 import com.mindworkouts.org.appeltres.ActivityPlaying;
+import com.mindworkouts.org.appeltres.Model.Card;
 import com.mindworkouts.org.appeltres.View.Render;
 
 
@@ -17,14 +18,16 @@ public class MainThread extends Thread {
     public static Canvas canvas;
     private ActivityPlaying iga;
     private Controller controller;
+    private boolean isShowingHand;
 
     public MainThread(SurfaceHolder surfaceHolder, Render render, ActivityPlaying iga, Controller controller){
         super();
         this.surfaceHolder = surfaceHolder;
         this.render = render;
-        render.refreshMatrixs();
         this.iga = iga;
         this.controller = controller;
+        isShowingHand = false;
+        controller.initMatrixs();
     }
 
     public void setRunning(boolean running){
@@ -50,19 +53,28 @@ public class MainThread extends Thread {
                 this.canvas = this.surfaceHolder.lockCanvas();
                 synchronized (this.surfaceHolder){
                     if (this.canvas != null) {
-                        if(reachedTimeoutScroll){
+                        //scrolling
+                        if(reachedTimeoutScroll && !isShowingHand){
                             reachedTimeoutScroll = false;
-                            render.refreshMatrixs();
                             this.controller.scrollHand(iga.isScrolling());
                         }
+                        //moving a card
                         else if (this.iga.touchDone() && iga.isScrolling()==0){
-                            render.refreshMatrixs();
                             this.controller.updateTouch((int)this.iga.getTouchX(),(int)this.iga.getTouchY());
                         }
+                        //reset cards position
                         else {
-                            render.refreshMatrixs();
                             this.controller.cardTouchReleased();
                         }
+                       /* if(this.iga.isTouchingHandPanel() && !isShowingHand){
+                            this.controller.showHand();
+                            isShowingHand = true;
+                        }
+                        else if(isShowingHand && !this.iga.isTouchingHandPanel()) {
+                            this.controller.hideHand();
+                            isShowingHand = false;
+                        }*/
+                        this.controller.resetMatrixs();
                         this.render.draw(this.canvas, p);
                     }
                 }

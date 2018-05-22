@@ -35,7 +35,10 @@ public class ActivityPlaying extends Activity implements
         private float currentY = 0;
         private float downX = 0;
         private float downY = 0;
+        private float lastDownX = 0;
+        private float lastDownY = 0;
         private boolean touchUp = true;
+        private boolean clickDone = false;
         private Controller controller;
 
 
@@ -80,12 +83,18 @@ public class ActivityPlaying extends Activity implements
             };
 
             Constants.HAND_CARDS_XY = pos;
-            Constants.HAND_PANEL = new Rect(0,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH,Constants.SCREEN_WIDTH_TOTAL,Constants.SCREEN_HEIGTH_TOTAL);
+            int posHidden[][] =   {
+                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,
+                    Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH},
+
+                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,
+                    Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH}};
+
+            Constants.HAND_CARDS_XY_UNSEEN= posHidden;
+            Constants.HAND_PANEL = new Rect(Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH/2,Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL);
 
             initVariables();
             setContentView(render);
-            render.refreshMatrixs();
-            controller.initGame();
         }
 
         private void initVariables() {
@@ -93,9 +102,9 @@ public class ActivityPlaying extends Activity implements
             render=null;
             System.gc();
             controller = new Controller(getApplicationContext());
-            int [] values = {7,2,1,4,6,12,8};
-            controller.createPlayer(new Player(values));
             render = new Render(this.getApplicationContext(), controller);
+            controller.setRender(render);
+            controller.createPlayer();
             this.thread = new MainThread(this.render.getHolder(), this.render, this, controller);
             this.thread.setRunning(true);
             this.thread.start();
@@ -123,7 +132,7 @@ public class ActivityPlaying extends Activity implements
                 }
             }
         }
-
+        public boolean isTouchingHandPanel(){return clickDone&&Constants.HAND_PANEL.contains((int)this.lastDownX,(int)this.lastDownY);}
         public boolean touchDone(){
             return this.beenTouched;
         }
@@ -131,10 +140,10 @@ public class ActivityPlaying extends Activity implements
             return this.touchUp;
         }
         public int isScrolling(){
-            //TODO: if touch is inside area of cards to scroll
             if(!touchUp && Constants.HAND_PANEL.contains((int)this.currentX,(int)this.currentY)){
-                if (Math.abs(downX - currentX) > Math.abs(downY
-                        - currentY)) {
+                if (Math.abs(downX - currentX) > Math.abs(downY- currentY)
+                        &&
+                        Math.abs(downX-currentX)>Constants.SCREEN_WIDTH_TOTAL/7) {
                     //RIGHT
                     if (downX < currentX) {
                         return -1;
@@ -171,14 +180,19 @@ public class ActivityPlaying extends Activity implements
             this.currentY = event.getY();
             this.beenTouched = true;
             if(event.getAction()==MotionEvent.ACTION_UP || event.getAction()==MotionEvent.ACTION_CANCEL){
+                touchUp=true;
+                if(event.getEventTime() -event.getDownTime() <200)clickDone=true;
+                else clickDone=false;
                 beenTouched = false;
                 downX=0;
                 downY=0;
-                touchUp=true;
             }
-            else
+            else {
                 touchUp = false;
+            }
             if(event.getAction()==MotionEvent.ACTION_DOWN){
+                lastDownX =currentX;
+                lastDownY=currentY;
                 downX=currentX;
                 downY=currentY;
             }

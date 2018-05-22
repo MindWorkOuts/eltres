@@ -39,6 +39,7 @@ public class Player {//extends Entity{
                 this.handCards.get(this.targetCards[index]).setFocus(true);
                 this.handCards.get(this.targetCards[index]).setNextXPosition(newx);
                 this.handCards.get(this.targetCards[index]).setNextYPosition(newy);
+                this.updateMatrix(this.targetCards[index]);
             }
             this.handCards.get(this.targetCards[index]).setFocus(false);
         }
@@ -53,10 +54,12 @@ public class Player {//extends Entity{
                     if (trigger.intersect(card.getPositionX() - card.getWidth() / triggerEpsilon, card.getPositionY() - card.getHeight() / triggerEpsilon, card.getPositionX() + card.getWidth() / triggerEpsilon, card.getPositionY() + card.getHeight() / triggerEpsilon)) {
                         card.setNextXPosition(card.getStaticX());
                         card.setNextYPosition(card.getStaticY());
+                        card.updateMatrix();
                     } else {
                         double[] vector = Constants.normalize(card.getPositionX() - card.getStaticX(), card.getPositionY() - card.getStaticY());
                         card.setNextXPosition((int) (card.getPositionX() - vector[0] * card.getSpeed()));
                         card.setNextYPosition((int) (card.getPositionY() - vector[1] * card.getSpeed()));
+                        card.updateMatrix();
                     }
                 }
             }
@@ -72,14 +75,15 @@ public class Player {//extends Entity{
         int max = Math.min(handCards.size(), this.targetCardsSize-1);
 
         if(direction+targetCards[0]>=0 && direction+targetCards[max]<handCards.size()){
-            //scrolling izquierda, last izq hide
             if(direction==1){
                 this.handCards.get(targetCards[0]).setNextXPosition(Constants.HAND_CARDS_XY[0][0]);
                 this.handCards.get(targetCards[0]).setNextYPosition(Constants.HAND_CARDS_XY[0][1]+this.handCards.get(targetCards[0]).getHeight());
+                updateMatrix(targetCards[0]);
             }
-            else if (direction==-1){
+            else if (direction==0){
                 this.handCards.get(targetCards[targetCardsSize-1]).setNextXPosition(Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][0]);
                 this.handCards.get(targetCards[targetCardsSize-1]).setNextYPosition(Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][1]+this.handCards.get(targetCards[targetCardsSize-1]).getHeight());
+                updateMatrix(targetCards[targetCardsSize-1]);
             }
 
             for (int i = 0 ; i < targetCardsSize; i++) {
@@ -89,6 +93,21 @@ public class Player {//extends Entity{
             }
         }
     }
+    public void showHand(){
+        for (int i = 0; i < getHandCards().size(); i++){
+            Card card = getHandCards().get(i);
+            card.setStaticY(card.getStaticY()-card.getHeight()/4);
+            updateMatrix(i);
+        }
+    }
+    public void hideHand(){
+        for (int i = 0; i < getHandCards().size(); i++){
+            Card card = getHandCards().get(i);
+            card.setStaticY(card.getStaticY()-card.getHeight()/4);
+            updateMatrix(i);
+        }
+    }
+    public void updateMatrix(int index){this.handCards.get(index).updateMatrix();}
 
     public ArrayList<Card> getHandCards() {
         ArrayList<Card> handVisible = new ArrayList<>();
@@ -99,5 +118,12 @@ public class Player {//extends Entity{
     }
     public ArrayList<Card> getAllCards() {
         return handCards;
+    }
+    public ArrayList<Card> getNotVisibleCards() {
+        ArrayList<Card> handNotVisible = (ArrayList<Card>)handCards.clone();
+        for (int i = 0 ; i < targetCardsSize; i++) {
+            handNotVisible.remove(handCards.get(targetCards[i]));
+        }
+        return handNotVisible ;
     }
 }

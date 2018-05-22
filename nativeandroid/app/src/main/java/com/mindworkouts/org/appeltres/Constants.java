@@ -20,8 +20,6 @@ public class Constants {
     public static Matrix LEFT_CARD_MATRIX;
     public static Matrix RIGHT_CARD_MATRIX;
     public static Matrix CENTER_CARD_MATRIX;
-    public static Matrix[] HAND_CARD_MATRIX;
-    public static ArrayList<Matrix> STATIC_HAND_MATRIX;
     //% hidding of height card
     public static final float HIDDING_CARDS_FACTOR = 0.33f;
     public static int CELDA_HEIGTH;
@@ -63,7 +61,12 @@ public class Constants {
     public static final int MAX_HEALTH = 100;
     public static final int MAX_SPEED = 100;
     public static final int MAX_FIRERATE = 5;
+    public static Matrix[] HAND_CARD_MATRIX;
     public static int HAND_CARDS_XY[][] = new int[5][2];
+    //unseen hand cards, left = 0 &&right = 1
+    public static int HAND_CARDS_XY_UNSEEN[][] = new int[2][2];
+    public static Matrix[] HAND_CARD_MATRIX_UNSEEN = new Matrix[2];
+    public static int BITMAP_CARDS_SIZE[][];
     public static int MAX_CARDS_SEEN = 5;
     public static double[] normalize(int x, int y){
         double len = sqrt(x*x+y*y);

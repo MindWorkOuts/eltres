@@ -30,34 +30,8 @@ public class Render extends SurfaceView {
     public Render(Context context, Controller controller) {
         super(context);
         this.initBitmaps();
+        this.setBitmapDims();
         this.controller = controller;
-
-    }
-    public void refreshMatrixs(){
-    ArrayList <Card> playerHand = controller.getVisiblePlayerHand();
-        int degrees [] = {340,350,0,10,20};
-        Constants.HAND_CARD_MATRIX = new Matrix[5];
-        for (int i = 0; i < playerHand.size() && i < Constants.MAX_CARDS_SEEN; i++){
-            Card card = playerHand.get(i);
-            int positionX = card.getPositionX();
-            int positionY = card.getPositionY();
-
-            int bWidth = this.cardsBitmap.get(card.getValue()).getWidth();
-            int bHeight = this.cardsBitmap.get(card.getValue()).getHeight();
-            float scaleWidth = ((float) card.getWidth()) / bWidth;
-            float scaleHeight = ((float) card.getHeight()) / bHeight;
-            Matrix matrix = new Matrix();
-            matrix.setScale(scaleWidth, scaleHeight);
-            matrix.postTranslate(positionX,positionY);
-            if(degrees[i]==degrees[0]){
-                matrix.postTranslate(0,-((float)Math.sin((double)degrees[i]*Math.PI/180)*0.8f*card.getWidth()));
-            }
-            else if(degrees[i]==degrees[1]){
-                matrix.postTranslate(0,-(float)Math.sin((double)degrees[i]*Math.PI/180)*0.9f*card.getWidth()/2);
-            }
-            matrix.preRotate(degrees[i]);
-            Constants.HAND_CARD_MATRIX[i] = matrix;
-        }
 
     }
     public void draw(Canvas canvas, Point p) {
@@ -66,8 +40,15 @@ public class Render extends SurfaceView {
         for (int i = 0; i < playerHand.size() && i < Constants.MAX_CARDS_SEEN; i++){
             Card card = playerHand.get(i);
             Bitmap bitmapCard = this.cardsBitmap.get(card.getValue());
-            canvas.drawBitmap(bitmapCard,Constants.HAND_CARD_MATRIX[i], null);
+            canvas.drawBitmap(bitmapCard,card.getCardMatrix(), null);
             canvas.drawText(""+p.x+":"+p.y,Constants.SCREEN_WIDTH_TOTAL/2,Constants.SCREEN_HEIGTH_TOTAL/2,color);
+        }
+    }
+    public void setBitmapDims(){
+        Constants.BITMAP_CARDS_SIZE = new int[cardsBitmap.size()][2];
+        for(int i = 0 ; i < this.cardsBitmap.size(); i++) {
+            Constants.BITMAP_CARDS_SIZE[i][0] = this.cardsBitmap.get(i).getWidth();
+            Constants.BITMAP_CARDS_SIZE[i][1] = this.cardsBitmap.get(i).getHeight();
         }
     }
     private void initBitmaps(){
