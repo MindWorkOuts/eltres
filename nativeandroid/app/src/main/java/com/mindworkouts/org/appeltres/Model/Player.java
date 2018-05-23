@@ -96,15 +96,13 @@ public class Player {//extends Entity{
     public void showHand(){
         for (int i = 0; i < getHandCards().size(); i++){
             Card card = getHandCards().get(i);
-            card.setStaticY(card.getStaticY()-card.getHeight()/4);
-            updateMatrix(i);
+            card.setStaticY(Constants.HAND_CARDS_XY_SHOWING[i][1]);
         }
     }
     public void hideHand(){
         for (int i = 0; i < getHandCards().size(); i++){
             Card card = getHandCards().get(i);
-            card.setStaticY(card.getStaticY()-card.getHeight()/4);
-            updateMatrix(i);
+            card.setStaticY(Constants.HAND_CARDS_XY[i][1]);
         }
     }
     public void updateMatrix(int index){this.handCards.get(index).updateMatrix();}

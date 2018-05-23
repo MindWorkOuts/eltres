@@ -81,6 +81,11 @@ public class ActivityPlaying extends Activity implements
                     {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,(int)(
                             Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR-yTranslation/2)}
             };
+            Constants.HAND_CARDS_XY_SHOWING = new int[5][2];
+            for(int i = 0; i < pos.length; i++){
+                Constants.HAND_CARDS_XY_SHOWING[i][0]=pos[i][0];
+                Constants.HAND_CARDS_XY_SHOWING[i][1]=pos[i][1]-Constants.CARD_HEIGTH/4;
+            }
 
             Constants.HAND_CARDS_XY = pos;
             int posHidden[][] =   {
@@ -132,7 +137,9 @@ public class ActivityPlaying extends Activity implements
                 }
             }
         }
-        public boolean isTouchingHandPanel(){return clickDone&&Constants.HAND_PANEL.contains((int)this.lastDownX,(int)this.lastDownY);}
+        public boolean isTouchingHandPanel(){
+            return clickDone && Constants.HAND_PANEL.contains((int)this.lastDownX,(int)this.lastDownY);
+        }
         public boolean touchDone(){
             return this.beenTouched;
         }
@@ -143,7 +150,7 @@ public class ActivityPlaying extends Activity implements
             if(!touchUp && Constants.HAND_PANEL.contains((int)this.currentX,(int)this.currentY)){
                 if (Math.abs(downX - currentX) > Math.abs(downY- currentY)
                         &&
-                        Math.abs(downX-currentX)>Constants.SCREEN_WIDTH_TOTAL/7) {
+                        Math.abs(downX-currentX)>Constants.SCREEN_WIDTH_TOTAL/14) {
                     //RIGHT
                     if (downX < currentX) {
                         return -1;

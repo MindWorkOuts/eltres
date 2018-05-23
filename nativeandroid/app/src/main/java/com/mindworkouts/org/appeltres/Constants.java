@@ -66,6 +66,8 @@ public class Constants {
     //unseen hand cards, left = 0 &&right = 1
     public static int HAND_CARDS_XY_UNSEEN[][] = new int[2][2];
     public static Matrix[] HAND_CARD_MATRIX_UNSEEN = new Matrix[2];
+    public static int HAND_CARDS_XY_SHOWING[][] = new int[5][2];
+    public static Matrix[] HAND_CARD_MATRIX_SHOWING= new Matrix[5];
     public static int BITMAP_CARDS_SIZE[][];
     public static int MAX_CARDS_SEEN = 5;
     public static double[] normalize(int x, int y){

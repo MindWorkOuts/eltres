@@ -54,7 +54,7 @@ public class MainThread extends Thread {
                 synchronized (this.surfaceHolder){
                     if (this.canvas != null) {
                         //scrolling
-                        if(reachedTimeoutScroll && !isShowingHand){
+                        if(reachedTimeoutScroll){
                             reachedTimeoutScroll = false;
                             this.controller.scrollHand(iga.isScrolling());
                         }
@@ -65,15 +65,11 @@ public class MainThread extends Thread {
                         //reset cards position
                         else {
                             this.controller.cardTouchReleased();
+                            if(this.iga.isTouchingHandPanel() )
+                                this.controller.showHand();
+                            else
+                                this.controller.hideHand();
                         }
-                       /* if(this.iga.isTouchingHandPanel() && !isShowingHand){
-                            this.controller.showHand();
-                            isShowingHand = true;
-                        }
-                        else if(isShowingHand && !this.iga.isTouchingHandPanel()) {
-                            this.controller.hideHand();
-                            isShowingHand = false;
-                        }*/
                         this.controller.resetMatrixs();
                         this.render.draw(this.canvas, p);
                     }

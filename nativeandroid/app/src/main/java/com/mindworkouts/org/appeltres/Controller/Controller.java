@@ -17,9 +17,11 @@ public class Controller {
     private int touchCardPointer = -1;
     private Context context;
     private Render render;
+    private boolean showingHand;
     public Controller(Context context){
         this.context = context;
         render=null;
+        showingHand = false;
     }
     public void initGame(){
     }
@@ -36,27 +38,37 @@ public class Controller {
         int degrees [] = {340,350,0,10,20};
         Constants.HAND_CARD_MATRIX = new Matrix[Constants.MAX_CARDS_SEEN];
         Constants.HAND_CARD_MATRIX_UNSEEN = new Matrix[2];
+        Constants.HAND_CARD_MATRIX_SHOWING = new Matrix[Constants.MAX_CARDS_SEEN];
+        Matrix matrix, matrix2;
+        Card card;
         for (int i = 0; i < Constants.MAX_CARDS_SEEN && i < playerHand.size(); i++){
-            Card card = playerHand.get(i);
+            card = playerHand.get(i);
             int positionX = card.getPositionX();
             int positionY = card.getPositionY();
             int bWidth = Constants.BITMAP_CARDS_SIZE[card.getValue()][0];
             int bHeight = Constants.BITMAP_CARDS_SIZE[card.getValue()][1];
             float scaleWidth = ((float) card.getWidth()) / bWidth;
             float scaleHeight = ((float) card.getHeight()) / bHeight;
-            Matrix matrix = new Matrix();
+            matrix = new Matrix();
+            matrix2 = new Matrix();
             matrix.setScale(scaleWidth, scaleHeight);
             matrix.postTranslate(positionX, positionY);
+            matrix2.setScale(scaleWidth, scaleHeight);
+            matrix2.postTranslate(positionX, positionY);
             if (degrees[i] == degrees[0]) {
                 matrix.postTranslate(0, -((float) Math.sin((double) degrees[i] * Math.PI / 180) * 0.8f * card.getWidth()));
-
+                matrix2.postTranslate(0, -((float) Math.sin((double) degrees[i] * Math.PI / 180) * 0.8f * card.getWidth()));
             } else if (degrees[i] == degrees[1]) {
                 matrix.postTranslate(0, -(float) Math.sin((double) degrees[i] * Math.PI / 180) * 0.9f * card.getWidth() / 2);
+                matrix2.postTranslate(0, -(float) Math.sin((double) degrees[i] * Math.PI / 180) * 0.9f * card.getWidth() / 2);
             }
             matrix.preRotate(degrees[i]);
+            matrix2.preRotate(degrees[i]);
             card.setCardMatrix(matrix);
             Constants.HAND_CARD_MATRIX[i] = matrix;
-        }
+            matrix2.postTranslate(0,-Constants.CARD_HEIGTH/4);
+            Constants.HAND_CARD_MATRIX_SHOWING[i] = matrix2;
+         }
         for (int i = playerHand.size(); i < Constants.MAX_CARDS_SEEN; i++){
             int positionX = Constants.HAND_CARDS_XY[i][0];
             int positionY = Constants.HAND_CARDS_XY[i][1];
@@ -64,11 +76,18 @@ public class Controller {
             int bHeight = Constants.BITMAP_CARDS_SIZE[1][1];
             float scaleWidth = ((float) Constants.CARD_WIDTH) / bWidth;
             float scaleHeight = ((float) Constants.CARD_HEIGTH) / bHeight;
-            Matrix matrix = new Matrix();
+            matrix = new Matrix();
             matrix.setScale(scaleWidth, scaleHeight);
             matrix.postTranslate(positionX, positionY);
             matrix.preRotate(degrees[i]);
             Constants.HAND_CARD_MATRIX[i] = matrix;
+            matrix2 = new Matrix();
+            matrix2.setScale(scaleWidth, scaleHeight);
+            matrix2.postTranslate(positionX, positionY);
+            matrix2.preRotate(degrees[i]);
+            matrix2.postTranslate(0,-Constants.CARD_HEIGTH/4);
+            Constants.HAND_CARD_MATRIX_SHOWING[i] = matrix2;
+
         }
         for (int i = 0; i < 2 ; i++){
             int positionX = Constants.HAND_CARDS_XY_UNSEEN[i][0];
@@ -77,7 +96,7 @@ public class Controller {
             int bHeight = Constants.BITMAP_CARDS_SIZE[1][1];
             float scaleWidth = ((float) Constants.CARD_WIDTH/ bWidth);
             float scaleHeight = ((float) Constants.CARD_HEIGTH/ bHeight);
-            Matrix matrix = new Matrix();
+            matrix = new Matrix();
             matrix.setScale(scaleWidth, scaleHeight);
             matrix.postTranslate(positionX, positionY);
             if (i == 0) {
@@ -89,7 +108,7 @@ public class Controller {
         }
         playerHand = getNotVisibleHand();
         for (int i = 0; i < playerHand.size() ; i++) {
-            Card card = playerHand.get(i);
+            card = playerHand.get(i);
             card.setCardMatrix(Constants.HAND_CARD_MATRIX_UNSEEN[1]);
         }
     }
@@ -97,8 +116,11 @@ public class Controller {
         ArrayList <Card> playerHand = getVisiblePlayerHand();
         for (int i = 0; i < Constants.MAX_CARDS_SEEN && i < playerHand.size(); i++){
             Card card = playerHand.get(i);
-            if(card.getPositionX() == Constants.HAND_CARDS_XY[i][0] && card.getPositionY() == Constants.HAND_CARDS_XY[i][1]){
-                card.setCardMatrix(Constants.HAND_CARD_MATRIX[i]);
+            if((!showingHand) && (card.getPositionX() == Constants.HAND_CARDS_XY[i][0] && card.getPositionY() == Constants.HAND_CARDS_XY[i][1])) {
+                    card.setCardMatrix(Constants.HAND_CARD_MATRIX[i]);
+            }
+            else if((showingHand )&& (card.getPositionX() == Constants.HAND_CARDS_XY_SHOWING[i][0] && card.getPositionY() == Constants.HAND_CARDS_XY_SHOWING[i][1])){
+                card.setCardMatrix(Constants.HAND_CARD_MATRIX_SHOWING[i]);
             }
             else
                 card.updateMatrix();
@@ -155,6 +177,12 @@ public class Controller {
     public void scrollHand(int where){
         this.mainPlayer.scrollHand(where);
     }
-    public void showHand(){this.mainPlayer.showHand();}
-    public void hideHand(){this.mainPlayer.hideHand();}
+    public void showHand(){
+        this.showingHand=true;
+        this.mainPlayer.showHand();
+    }
+    public void hideHand(){
+        this.showingHand=false;
+        this.mainPlayer.hideHand();
+    }
 }
