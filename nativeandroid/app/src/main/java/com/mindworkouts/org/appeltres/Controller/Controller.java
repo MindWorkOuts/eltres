@@ -10,6 +10,8 @@ import com.mindworkouts.org.appeltres.Model.Player;
 import com.mindworkouts.org.appeltres.View.Render;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 //TODO: Program responsible for dealing turn and assign it to the player
 
 public class Controller {
@@ -17,23 +19,146 @@ public class Controller {
     private int touchCardPointer = -1;
     private Context context;
     private Render render;
+    private Logic logic;
     private boolean showingHand;
+    private Network net;
+    private ArrayList<Card> heap;
+    private ArrayList<Card> drawingCards;
+    private boolean playedCard;
+    private int estadoAnterior;
     public Controller(Context context){
         this.context = context;
+        this.logic = new Logic();
         render=null;
         showingHand = false;
+        createPlayer();
+        //wait network()
+        //refreshStatus
+        //updateGame
+        setTurn(true);
+        playedCard = false;
     }
-    public void initGame(){
+    private void initDrawingCards(){
+        drawingCards = new ArrayList<Card>();
+        int [] degrees = {355,0,5};
+        for (int i = 0; i < 3; i++){
+            Card card = new Card(Constants.CARD_TABLE_WIDTH,Constants.CARD_TABLE_HEIGTH,Constants.DRAW_CARDS_X,Constants.DRAW_CARDS_Y, 0);
+            card.setDegrees(degrees[i]);
+            card.updateMatrix();
+            this.drawingCards.add(card);
+        }
+    }
+    public ArrayList<Card> getDrawingCards(){return this.drawingCards;}
+    public void setTurn(boolean isTurn){
+        mainPlayer.setTurn(isTurn);
+    }
+    public void updateGame(){
+        //update heap check power of last card added
+        if(playedCard) {
+            if(!heap.isEmpty()) {
+                int lastValue = heap.get(heap.size() - 1).getValue();
+                switch (lastValue) {
+                    case 10:
+                        heap.clear();
+                    break;
+                    default:
+                        playedCard=false;
+                    break;
+                }
+            }
+        }
+        if(!markPlayables()){
+            playerEatHeap();
+        }
+        mainPlayer.setTurn(true);
+    }
+
+    /**
+     * TODO: PLAYCARDHARD
+     * @param index
+     * @return
+     */
+    public Card playCard(int index){
+        Card card = mainPlayer.getHandCards().get(index);
+        mainPlayer.removeCard(index);
+        card.setHeight(Constants.CARD_TABLE_HEIGTH);
+        card.setWidth(Constants.CARD_TABLE_WIDTH);
+        card.setStaticX(Constants.HEAP_CARDS_X);
+        card.setStaticY(Constants.HEAP_CARDS_Y);
+        card.setDegrees(Constants.HEAP_DEGREES);
+        if( Constants.HEAP_DEGREES==Constants.HEAP_MAX_DEGREES)
+            Constants.HEAP_DEGREES_DIRECTION = -1;
+        else if (Constants.HEAP_DEGREES==Constants.HEAP_MIN_DEGREES)
+            Constants.HEAP_DEGREES_DIRECTION = +1;
+        Constants.HEAP_DEGREES = Constants.HEAP_DEGREES + 10*Constants.HEAP_DEGREES_DIRECTION;
+        ArrayList<Integer> sortedValues= new ArrayList<Integer>();
+        for(Card cardx: mainPlayer.getAllCards()) {
+            sortedValues.add(cardx.getValue());
+        }
+        mainPlayer.removeHand();
+        Collections.sort(sortedValues);
+        mainPlayer.createHandFromValues(sortedValues);
+        return card;
+    }
+
+    public void playerEatHeap(){
+        ArrayList<Card> allHand =getAllPlayerHand();
+        ArrayList<Integer> sortedValues = new ArrayList<Integer>();
+        allHand.addAll(this.heap);
+        for(Card card : allHand) {
+            sortedValues.add(card.getValue());
+        }
+        heap.clear();
+        mainPlayer.removeHand();
+        Collections.sort(sortedValues);
+        mainPlayer.createHandFromValues(sortedValues);
+        mainPlayer.setHandsInHeap();
+        //TODO: mainPlayer.refreshStaticsPos();
+    }
+    public ArrayList<Card> getPlayables(){
+        ArrayList<Card> playables = new ArrayList<Card>();
+        for(Card card : mainPlayer.getHandCards()){
+            if (cardPlayable(card.getValue())) {
+                playables.add(card);
+            }
+        }
+        return  playables;
+    }
+    public boolean markPlayables(){
+        boolean canPlay = false;    ArrayList<Card> playables = new ArrayList<Card>();
+        for(Card card : mainPlayer.getHandCards()) {
+            if (cardPlayable(card.getValue())) {
+                card.showPlayable(true);
+                canPlay = true;
+            }
+            else
+                card.showPlayable(false);
+        }
+        return canPlay;
+    }
+    public boolean cardPlayable(int value){
+        if(heap.isEmpty())return true;
+        int finalValue = heap.get(heap.size()-1).getValue();
+        switch(heap.get(heap.size()-1).getValue()){
+            case 3:
+                if(heap.size()>1)
+                    finalValue = heap.get(heap.size()-2).getValue();
+                break;
+        }
+        return logic.getForbiddenMoves()[finalValue][value]==0;
     }
     public void createPlayer(){
-        int [] values = {7,2,1,4,6,12,8};
+        ArrayList<Integer> values = new ArrayList<Integer>();
+        int [] vals = {1,4,3,6,8,10,11,12,13};
+        for(int i = 0 ; i < vals.length; i++){values.add(vals[i]);}
         this.mainPlayer = new Player(values);
-        initMatrixs();
+        heap = new ArrayList<Card>();
     }
     public void setRender(Render render){
         this.render= render;
     }
     public void initMatrixs(){
+        this.initDrawingCards();
         ArrayList <Card> playerHand = getVisiblePlayerHand();
         int degrees [] = {340,350,0,10,20};
         Constants.HAND_CARD_MATRIX = new Matrix[Constants.MAX_CARDS_SEEN];
@@ -117,7 +242,7 @@ public class Controller {
         for (int i = 0; i < Constants.MAX_CARDS_SEEN && i < playerHand.size(); i++){
             Card card = playerHand.get(i);
             if((!showingHand) && (card.getPositionX() == Constants.HAND_CARDS_XY[i][0] && card.getPositionY() == Constants.HAND_CARDS_XY[i][1])) {
-                    card.setCardMatrix(Constants.HAND_CARD_MATRIX[i]);
+                card.setCardMatrix(Constants.HAND_CARD_MATRIX[i]);
             }
             else if((showingHand )&& (card.getPositionX() == Constants.HAND_CARDS_XY_SHOWING[i][0] && card.getPositionY() == Constants.HAND_CARDS_XY_SHOWING[i][1])){
                 card.setCardMatrix(Constants.HAND_CARD_MATRIX_SHOWING[i]);
@@ -138,32 +263,89 @@ public class Controller {
                 card.updateMatrix();
         }
     }
-
+    public ArrayList<Card> getHeap() {
+        return heap;
+    }
     public int getTouchCardPointer(){return this.touchCardPointer;}
+    public void drawCard(){
+        if(mainPlayer.getAllCards().size()<3){
+            mainPlayer.addCard(1+new Random().nextInt(13));
+            Card card = mainPlayer.getAllCards().get(mainPlayer.getAllCards().size()-1);
+            card.setNextXPosition(Constants.DRAW_CARDS_X);
+            card.setNextYPosition(Constants.DRAW_CARDS_Y);
+        }
+    }
     public void cardTouchReleased(){
+        if(touchCardPointer!=-1) {
+            Card card = mainPlayer.getAllCards().get(touchCardPointer);
+            if (this.cardPlayable(card.getValue())) {;
+                if (mainPlayer.isCardInHeapRange(touchCardPointer) && mainPlayer.isTurn()) {
+                    addCardToHeap(this.playCard(touchCardPointer));
+                    drawCard();
+                }
+            }
+        }
         this.touchCardPointer=-1;
-        this.mainPlayer.resetCardsPosition();
+        updateGame();
+        resetCardsPosition();
+    }
+    public void addCardToHeap(Card card){
+        this.heap.add(card);
+        this.playedCard = true;
+
+    }
+    public void resetCardsPosition() {
+        Constants.ACTUAL_CARD_SPEED = Math.min(Constants.ACTUAL_CARD_SPEED + 4, Constants.FINAL_CARD_SPEED);
+        this.updateGame();
+        ArrayList<Card> allGameCards = this.mainPlayer.getHandCards();
+        allGameCards.addAll(heap);
+        for (int i = 0; i < allGameCards.size(); i++) {
+            Card card = allGameCards.get(i);
+            int triggerEpsilon = 10;
+            if(getTouchCardPointer()!=i){
+                if(card.getPositionX()!=card.getStaticX() || card.getPositionY()!=card.getStaticY()) {
+                    Rect trigger = new Rect(card.getStaticX() - card.getWidth() / triggerEpsilon, card.getStaticY() - card.getHeight() / triggerEpsilon, card.getStaticX() + card.getWidth() / triggerEpsilon, card.getStaticY() + card.getHeight() / triggerEpsilon);
+                    if (trigger.intersect(card.getPositionX() - card.getWidth() / triggerEpsilon, card.getPositionY() - card.getHeight() / triggerEpsilon, card.getPositionX() + card.getWidth() / triggerEpsilon, card.getPositionY() + card.getHeight() / triggerEpsilon)) {
+                        card.setNextXPosition(card.getStaticX());
+                        card.setNextYPosition(card.getStaticY());
+                        card.updateMatrix();
+                    } else {
+                        double[] d = Constants.normalize(card.getPositionX() - card.getStaticX(), card.getPositionY() - card.getStaticY());
+                        //distance / velocidad inicial **2 = 2*acelarcion
+                        card.setNextXPosition((int) (card.getPositionX() - d[0] * Constants.ACTUAL_CARD_SPEED));
+                        card.setNextYPosition((int) (card.getPositionY() - d[1] * Constants.ACTUAL_CARD_SPEED));
+                        card.updateMatrix();
+                    }
+                }
+            }
+        }
     }
     public void updateTouch (int x, int y){
         if(getTouchCardPointer()!=-1){
-           Card card = this.mainPlayer.getHandCards().get(getTouchCardPointer());
+           Constants.ACTUAL_CARD_SPEED = Constants.INITIAL_CARD_SPEED;
+            Card card = this.mainPlayer.getHandCards().get(getTouchCardPointer());
            this.mainPlayer.updateCardPosition(getTouchCardPointer(), x-card.getRect().width()/2, (int) y-card.getRect().height()/2,true);
            card.updateMatrix();
         }
         else {
             ArrayList<Card> playerHand = mainPlayer.getHandCards();
-            for (int i = playerHand.size()-1; i >= 0; i--) {
-                Card card = playerHand.get(i);
+            int cardIdx = -1;
+            Card card;
+            for (int i = 0; i < playerHand.size(); i++) {
+                card = playerHand.get(i);
                 if (card.getRect().contains( x, y)) {
-                    this.mainPlayer.updateCardPosition(i, (int) x-card.getRect().width()/2, (int) y-card.getRect().height()/2,true);
-                    this.touchCardPointer = i;
+                    cardIdx = i;
                 }
-                else{
-                    this.mainPlayer.resetCardsPosition();
-                    //this.mainPlayer.updateCardPosition(i,card.getStaticX(),card.getStaticY());
-                }
-                }
+            }
+            if(cardIdx!=-1){
+                card = mainPlayer.getHandCards().get(cardIdx);
+                this.mainPlayer.updateCardPosition(cardIdx, (int) x-card.getRect().width()/2, (int) y-card.getRect().height()/2,true);
+                this.touchCardPointer = cardIdx;
+
+
+            }
         }
+        resetCardsPosition();
     }
     public ArrayList<Card> getVisiblePlayerHand(){
         return mainPlayer.getHandCards();
@@ -185,4 +367,5 @@ public class Controller {
         this.showingHand=false;
         this.mainPlayer.hideHand();
     }
+    public boolean isShowingHand(){return showingHand;}
 }

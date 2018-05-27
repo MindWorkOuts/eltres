@@ -27,13 +27,21 @@ public class MainThread extends Thread {
         this.iga = iga;
         this.controller = controller;
         isShowingHand = false;
-        controller.initMatrixs();
-    }
+     }
 
     public void setRunning(boolean running){
         this.running = running;
     }
-   public void run(){
+
+    public void onResume(){
+        this.run();
+    }
+
+    public SurfaceHolder getSurfaceHolder() {
+        return surfaceHolder;
+    }
+
+    public void run(){
         long startTime;
         long timeMilliSeconds = 1000 / Constants.MAX_FPS; // 30 fps per second
         long waitTime;
@@ -53,23 +61,26 @@ public class MainThread extends Thread {
                 this.canvas = this.surfaceHolder.lockCanvas();
                 synchronized (this.surfaceHolder){
                     if (this.canvas != null) {
+                        if(this.iga.isTouchingHandPanel() )
+                            this.controller.showHand();
+                        else
+                            this.controller.hideHand();
                         //scrolling
-                        if(reachedTimeoutScroll){
-                            reachedTimeoutScroll = false;
-                            this.controller.scrollHand(iga.isScrolling());
-                        }
-                        //moving a card
-                        else if (this.iga.touchDone() && iga.isScrolling()==0){
-                            this.controller.updateTouch((int)this.iga.getTouchX(),(int)this.iga.getTouchY());
-                        }
-                        //reset cards position
-                        else {
-                            this.controller.cardTouchReleased();
-                            if(this.iga.isTouchingHandPanel() )
-                                this.controller.showHand();
-                            else
-                                this.controller.hideHand();
-                        }
+                        if(controller.isShowingHand()) {
+                            if (reachedTimeoutScroll) {
+                                reachedTimeoutScroll = false;
+                                this.controller.scrollHand(iga.isScrolling());
+                            }
+                            //moving a card
+                            else if (this.iga.touchDone() && iga.isScrolling() == 0) {
+                                this.controller.updateTouch((int) this.iga.getTouchX(), (int) this.iga.getTouchY());
+                            }else {
+                                this.controller.cardTouchReleased();
+                            }
+                            //reset cards position
+                        }else {
+                                this.controller.cardTouchReleased();
+                            }
                         this.controller.resetMatrixs();
                         this.render.draw(this.canvas, p);
                     }

@@ -7,32 +7,41 @@ import com.mindworkouts.org.appeltres.Constants;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentNavigableMap;
 
 public class Player {//extends Entity{
 
     private ArrayList<Card> handCards = new ArrayList<Card>();
     private int [] targetCards;
     private int targetCardsSize = 0;
+    private boolean isTurn;
 
 
-    public Player(/*int width, int height, int x, int y, */int[] vals) {
+    public Player(/*int width, int height, int x, int y, */ArrayList<Integer> vals) {
         //super(width, height, x, y);
         //TODO: iterate and set each final position, handCards position,
         //table cards position.
+        this.createHandFromValues(vals);
+        isTurn = false;
+    }
+    public void createHandFromValues(ArrayList<Integer> vals){
+        //table cards position.
+        targetCardsSize = 0;
+        this.handCards.clear();
         int i;
-        this.targetCards= new int[5];
-        for(i = 0; i < Constants.MAX_CARDS_SEEN && i < vals.length; i++){
+        this.targetCards= new int[Constants.MAX_CARDS_SEEN];
+        for(i = 0; i < Constants.MAX_CARDS_SEEN && i < vals.size(); i++){
             targetCards[i]= i;
             this.targetCardsSize+=1;
-            this.handCards.add(new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,Constants.HAND_CARDS_XY[i][0], Constants.HAND_CARDS_XY[i][1], vals[i]));
+            this.handCards.add(new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,Constants.HAND_CARDS_XY[i][0], Constants.HAND_CARDS_XY[i][1], vals.get(i)));
         }
-        if(vals.length > Constants.MAX_CARDS_SEEN){
-            for(i = Constants.MAX_CARDS_SEEN; i < vals.length; i++){
-                this.handCards.add(new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][0],Constants.CARD_HEIGTH+Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][1], vals[i]));
+        if(vals.size() > Constants.MAX_CARDS_SEEN){
+            for(i = Constants.MAX_CARDS_SEEN; i < vals.size(); i++){
+                this.handCards.add(new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][0],Constants.CARD_HEIGTH+Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][1], vals.get(i)));
             }
         }
     }
-
     public void updateCardPosition(int index, int newx, int newy, boolean isFromUI){
         for (int i = 0; i < this.handCards.size(); i++){
             if (i==index){
@@ -44,26 +53,42 @@ public class Player {//extends Entity{
             this.handCards.get(this.targetCards[index]).setFocus(false);
         }
     }
-    public void resetCardsPosition() {
-        for (int i = 0; i < this.getHandCards().size(); i++) {
-            Card card = this.getHandCards().get(i);
-            int triggerEpsilon = 10;
-            if(!card.isFocusing()){
-                if(card.getPositionX()!=card.getStaticX() || card.getPositionY()!=card.getStaticY()) {
-                    Rect trigger = new Rect(card.getStaticX() - card.getWidth() / triggerEpsilon, card.getStaticY() - card.getHeight() / triggerEpsilon, card.getStaticX() + card.getWidth() / triggerEpsilon, card.getStaticY() + card.getHeight() / triggerEpsilon);
-                    if (trigger.intersect(card.getPositionX() - card.getWidth() / triggerEpsilon, card.getPositionY() - card.getHeight() / triggerEpsilon, card.getPositionX() + card.getWidth() / triggerEpsilon, card.getPositionY() + card.getHeight() / triggerEpsilon)) {
-                        card.setNextXPosition(card.getStaticX());
-                        card.setNextYPosition(card.getStaticY());
-                        card.updateMatrix();
-                    } else {
-                        double[] vector = Constants.normalize(card.getPositionX() - card.getStaticX(), card.getPositionY() - card.getStaticY());
-                        card.setNextXPosition((int) (card.getPositionX() - vector[0] * card.getSpeed()));
-                        card.setNextYPosition((int) (card.getPositionY() - vector[1] * card.getSpeed()));
-                        card.updateMatrix();
-                    }
-                }
-            }
+    public boolean isCardInHeapRange(int index){return Constants.HEAP_RECT.contains(this.getHandCards().get(index).getCenterPoint()[0],getHandCards().get(index).getCenterPoint()[1]);}
+    public void setTurn(boolean is){isTurn=is;}
+    public boolean isTurn(){return isTurn;}
+    public void removeHand(){this.handCards.clear();}
+    public void addCard(int value){
+        if(handCards.size() < Constants.MAX_CARDS_SEEN){
+            Card card = new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,Constants.HAND_CARDS_XY[handCards.size()][0], Constants.HAND_CARDS_XY[handCards.size()][1], value);
+            targetCards[targetCardsSize] = handCards.size();
+            targetCardsSize+=1;
+            handCards.add(card);
+        }else{
+            Card card = new Card(Constants.CARD_WIDTH,Constants.CARD_HEIGTH,Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][0],Constants.CARD_HEIGTH+Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][1], value);
+            handCards.add(card);
         }
+    }/*
+    public void sortHand(){
+        ArrayList<Integer> sortedValues = new ArrayList<Integer>();
+        for (Card card : handCards) {
+            sortedValues.add(card.getValue());
+        }
+        Collections.sort(sortedValues);
+        for (int i = 0; i < handCards.size(); i++){
+            handCards.get(i).setValue(sortedValues.get(i));
+        }
+    }*/
+    public void addCard(Card card){
+        if(handCards.size() < Constants.MAX_CARDS_SEEN){
+            targetCards[targetCardsSize] = handCards.size();
+            targetCardsSize+=1;
+            handCards.add(card);
+        }else{
+            handCards.add(card);
+        }
+    }
+    public void removeCard(int index){
+        this.handCards.remove(targetCards[index]);
     }
     /*
       scrollea la mano
@@ -108,7 +133,7 @@ public class Player {//extends Entity{
     public void updateMatrix(int index){this.handCards.get(index).updateMatrix();}
 
     public ArrayList<Card> getHandCards() {
-        ArrayList<Card> handVisible = new ArrayList<>();
+        ArrayList<Card> handVisible = new ArrayList<Card>();
         for (int i = 0 ; i < targetCardsSize; i++) {
             handVisible.add(handCards.get(targetCards[i]));
         }
@@ -117,8 +142,19 @@ public class Player {//extends Entity{
     public ArrayList<Card> getAllCards() {
         return handCards;
     }
+    public void setHandsInHeap(){
+        for (Card card : handCards){
+            card.setNextXPosition(Constants.HEAP_RECT.centerX()-card.getWidth()/2);
+            card.setNextYPosition(Constants.HEAP_RECT.centerY()-card.getHeight()/2);
+        }
+        for(Card card: getNotVisibleCards()){
+            card.setNextXPosition(Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][0]);
+            card.setNextYPosition(Constants.HAND_CARDS_XY[Constants.MAX_CARDS_SEEN-1][1]+Constants.CARD_HEIGTH);
+        }
+    }
     public ArrayList<Card> getNotVisibleCards() {
-        ArrayList<Card> handNotVisible = (ArrayList<Card>)handCards.clone();
+        ArrayList<Card> handNotVisible = new ArrayList<Card>();
+        handNotVisible.addAll(getAllCards());
         for (int i = 0 ; i < targetCardsSize; i++) {
             handNotVisible.remove(handCards.get(targetCards[i]));
         }

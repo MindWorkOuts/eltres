@@ -38,9 +38,9 @@ public class ActivityPlaying extends Activity implements
         private float lastDownX = 0;
         private float lastDownY = 0;
         private boolean touchUp = true;
+        private boolean isShowingHand = false;
         private boolean clickDone = false;
         private Controller controller;
-
 
     public NotificationManager notificationManager;
         public TelephonyManager telephonyManager;
@@ -97,9 +97,16 @@ public class ActivityPlaying extends Activity implements
 
             Constants.HAND_CARDS_XY_UNSEEN= posHidden;
             Constants.HAND_PANEL = new Rect(Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH/2,Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL);
+            Constants.HEAP_RECT = new Rect(Constants.CARD_WIDTH, Constants.CARD_HEIGTH/4, Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH, Constants.SCREEN_HEIGTH_TOTAL/2);
+            Constants.HEAP_CARDS_X = Constants.HEAP_RECT.centerX()+Constants.CARD_TABLE_WIDTH/2;
+            Constants.HEAP_CARDS_Y = Constants.HEAP_RECT.centerY()-Constants.CARD_TABLE_HEIGTH/2;
+            Constants.DRAW_CARDS_X = Constants.HEAP_RECT.centerX()-2*Constants.CARD_TABLE_WIDTH/2;
+            Constants.DRAW_CARDS_Y = Constants.HEAP_RECT.centerY()-Constants.CARD_TABLE_HEIGTH/2;
+
 
             initVariables();
             setContentView(render);
+            controller.initMatrixs();
         }
 
         private void initVariables() {
@@ -109,22 +116,73 @@ public class ActivityPlaying extends Activity implements
             controller = new Controller(getApplicationContext());
             render = new Render(this.getApplicationContext(), controller);
             controller.setRender(render);
-            controller.createPlayer();
             this.thread = new MainThread(this.render.getHolder(), this.render, this, controller);
             this.thread.setRunning(true);
             this.thread.start();
         }
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            this.thread = new MainThread(this.render.getHolder(), this.render, this, controller);
-            this.thread.setRunning(true);
-            this.thread.start();
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int y = displayMetrics.heightPixels;
+            int x = displayMetrics.widthPixels;
+            Constants.SCREEN_HEIGTH_TOTAL = y;
+            Constants.SCREEN_WIDTH_TOTAL = x;
+            Constants.SCREEN_HEIGTH = y;
+            Constants.SCREEN_WIDTH = x;
+            int xTranslation = (int)(0.8*Constants.CARD_WIDTH);
+            int yTranslation = (int)(0.07*Constants.CARD_HEIGTH);
+            int [][] pos= {
+                    //IZQUIERDA MAX
+                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
+
+                    //CENTRO IZQUIERDA
+                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation) ,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
+
+                    //CENTRO
+                    {Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_WIDTH/2,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
+
+                    //CENTRO DERECHA
+                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR-yTranslation)},
+
+                    //DERECHA MAX, SI HAY MÁS DE 4 CARTAS
+                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,(int)(
+                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR-yTranslation/2)}
+            };
+            Constants.HAND_CARDS_XY_SHOWING = new int[5][2];
+            for(int i = 0; i < pos.length; i++){
+                Constants.HAND_CARDS_XY_SHOWING[i][0]=pos[i][0];
+                Constants.HAND_CARDS_XY_SHOWING[i][1]=pos[i][1]-Constants.CARD_HEIGTH/4;
+            }
+
+            Constants.HAND_CARDS_XY = pos;
+            int posHidden[][] =   {
+                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,
+                            Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH},
+
+                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,
+                            Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH}};
+
+            Constants.HAND_CARDS_XY_UNSEEN= posHidden;
+            Constants.HAND_PANEL = new Rect(Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH/2,Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL);
+            Constants.HEAP_RECT = new Rect(Constants.CARD_WIDTH, Constants.CARD_HEIGTH/4, Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH, Constants.SCREEN_HEIGTH_TOTAL/2);
+
+
+
+            initVariables();
+            setContentView(render);
+            controller.initMatrixs();
         }
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
         }
+
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
@@ -137,9 +195,13 @@ public class ActivityPlaying extends Activity implements
                 }
             }
         }
+        public boolean isClickDone(){return this.clickDone;}
         public boolean isTouchingHandPanel(){
-            return clickDone && Constants.HAND_PANEL.contains((int)this.lastDownX,(int)this.lastDownY);
+            boolean isTouching = Constants.HAND_PANEL.contains((int)this.lastDownX,(int)this.lastDownY);
+            if(isTouching)this.isShowingHand=true;
+            return isTouching;
         }
+        public boolean hideHand(){return !this.isShowingHand;}
         public boolean touchDone(){
             return this.beenTouched;
         }
@@ -148,8 +210,7 @@ public class ActivityPlaying extends Activity implements
         }
         public int isScrolling(){
             if(!touchUp && Constants.HAND_PANEL.contains((int)this.currentX,(int)this.currentY)){
-                if (Math.abs(downX - currentX) > Math.abs(downY- currentY)
-                        &&
+                if (Math.abs(downX - currentX) > Math.abs(downY- currentY)&&
                         Math.abs(downX-currentX)>Constants.SCREEN_WIDTH_TOTAL/14) {
                     //RIGHT
                     if (downX < currentX) {
@@ -198,6 +259,7 @@ public class ActivityPlaying extends Activity implements
                 touchUp = false;
             }
             if(event.getAction()==MotionEvent.ACTION_DOWN){
+                isShowingHand = false;
                 lastDownX =currentX;
                 lastDownY=currentY;
                 downX=currentX;
@@ -246,6 +308,7 @@ public class ActivityPlaying extends Activity implements
 
         @Override
         protected void onPause() {
+
             super.onPause();
         }
 

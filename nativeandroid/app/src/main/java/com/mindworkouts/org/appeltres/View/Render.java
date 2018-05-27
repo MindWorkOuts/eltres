@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
@@ -36,13 +37,35 @@ public class Render extends SurfaceView {
     }
     public void draw(Canvas canvas, Point p) {
         canvas.drawBitmap(this.background,new Rect(0,0,background.getWidth(),background.getHeight()),new Rect(0,0, Constants.SCREEN_WIDTH_TOTAL,Constants.SCREEN_HEIGTH_TOTAL),color);
-        ArrayList<Card> playerHand = controller.getVisiblePlayerHand();
-        for (int i = 0; i < playerHand.size() && i < Constants.MAX_CARDS_SEEN; i++){
-            Card card = playerHand.get(i);
-            Bitmap bitmapCard = this.cardsBitmap.get(card.getValue());
-            canvas.drawBitmap(bitmapCard,card.getCardMatrix(), null);
-            canvas.drawText(""+p.x+":"+p.y,Constants.SCREEN_WIDTH_TOTAL/2,Constants.SCREEN_HEIGTH_TOTAL/2,color);
+        canvas.drawText(""+p.x+":"+p.y,Constants.SCREEN_WIDTH_TOTAL/2,Constants.SCREEN_HEIGTH_TOTAL/2,color);
+        canvas.drawLine(Constants.HEAP_RECT.left,Constants.HEAP_RECT.top,Constants.HEAP_RECT.right,Constants.HEAP_RECT.top, color);
+        canvas.drawLine(Constants.HEAP_RECT.left,Constants.HEAP_RECT.top,Constants.HEAP_RECT.left,Constants.HEAP_RECT.bottom, color);
+        canvas.drawLine(Constants.HEAP_RECT.right,Constants.HEAP_RECT.top,Constants.HEAP_RECT.right,Constants.HEAP_RECT.bottom, color);
+        canvas.drawLine(Constants.HEAP_RECT.left,Constants.HEAP_RECT.bottom,Constants.HEAP_RECT.right,Constants.HEAP_RECT.bottom, color);
+        ArrayList<Card> cards;
+        Card card;
+        Bitmap bitmapCard;
+        int i;
+        cards = controller.getDrawingCards();
+        for(i = 0; i < cards.size(); i++){
+            card = cards.get(i);
+            bitmapCard = this.cardsBitmap.get(card.getValue());
+            canvas.drawBitmap(bitmapCard,card.getCardMatrix(), card.getPaint());
         }
+        cards = controller.getHeap();
+
+        for (i = 0; i < cards.size() ; i++){
+            card = cards.get(i);
+            bitmapCard = this.cardsBitmap.get(card.getValue());
+            canvas.drawBitmap(bitmapCard,card.getCardMatrix(), card.getPaint());
+        }
+        cards = controller.getVisiblePlayerHand();
+        for (i = 0; i < cards.size() && i < Constants.MAX_CARDS_SEEN; i++){
+            card = cards.get(i);
+            bitmapCard = this.cardsBitmap.get(card.getValue());
+            canvas.drawBitmap(bitmapCard,card.getCardMatrix(), card.getPaint());
+        }
+
     }
     public void setBitmapDims(){
         Constants.BITMAP_CARDS_SIZE = new int[cardsBitmap.size()][2];

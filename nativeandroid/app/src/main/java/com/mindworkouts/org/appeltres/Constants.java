@@ -5,6 +5,8 @@ import android.graphics.Rect;
 
 import java.util.ArrayList;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 
 public class Constants {
@@ -15,8 +17,18 @@ public class Constants {
     public static int SCREEN_HEIGTH_TOTAL;
     public static int SCREEN_WIDTH;
     public static int SCREEN_HEIGTH;
+    public static Rect HEAP_RECT;
     public static int CARD_HEIGTH = 250;
     public static int CARD_WIDTH = 192;
+    public static int CARD_TABLE_HEIGTH = 188;
+    public static int CARD_TABLE_WIDTH = 144;
+    public static int HEAP_DEGREES= 0;
+    public static final int HEAP_MAX_DEGREES= 30;
+    public static final int HEAP_MIN_DEGREES= 0;
+    public static int HEAP_DEGREES_DIRECTION= 1;
+    public static final int FINAL_CARD_SPEED = 50;
+    public static final int INITIAL_CARD_SPEED = 10;
+    public static int ACTUAL_CARD_SPEED = 40;
     public static Matrix LEFT_CARD_MATRIX;
     public static Matrix RIGHT_CARD_MATRIX;
     public static Matrix CENTER_CARD_MATRIX;
@@ -30,7 +42,6 @@ public class Constants {
     public static final int HERO_DEFAULT_SHOOT_DELAY = 10;
     public static int HERO_SHOOT_DELAY = 8;
     public static final int BULLET_DAMAGE = 20;
-    public static final int CARD_SPEED = 40;
     public static final int NUM_CELDAS_HORIZONTAL = 9;
     public static final int NUM_CELDAS_VERTICAL = 16;
     public static final char SIMBOLO_SUELO = '0';
@@ -70,7 +81,9 @@ public class Constants {
     public static Matrix[] HAND_CARD_MATRIX_SHOWING= new Matrix[5];
     public static int BITMAP_CARDS_SIZE[][];
     public static int MAX_CARDS_SEEN = 5;
-    public static double[] normalize(int x, int y){
+
+
+        public static double[] normalize(int x, int y){
         double len = sqrt(x*x+y*y);
         if (len>0){
             double auxx = (double) (x)/len;
@@ -81,5 +94,17 @@ public class Constants {
         double [] norm = {x,y};
         return norm;
     }
+    //faster than sqrts
+    public static double speedRatio(int x, int y){
+        int xabs = abs(x);
+        int yabs = abs(y);
+        double ratio = 1 / max(xabs, yabs);
+        ratio = ratio * (1.29289 - (xabs+yabs) * ratio * 0.29289);
+        return ratio;
+    }
     public static Rect HAND_PANEL;
+    public static int DRAW_CARDS_X;
+    public static int DRAW_CARDS_Y;
+    public static int HEAP_CARDS_X;
+    public static int HEAP_CARDS_Y;
 }
