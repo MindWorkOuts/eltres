@@ -113,7 +113,7 @@ public class MainThread extends Thread {
             if(iga.isScrolling()!=0) {
                 scrollCount += 1;
                 if (scrollCount >= scrollTimeout) {
-                    scrollCount =-8;
+                    scrollCount =-scrollTimeout;
                     reachedTimeoutScroll = true;
                 }
             }else scrollCount=0;

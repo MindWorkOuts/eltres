@@ -9,6 +9,7 @@ import com.mindworkouts.org.appeltres.Model.Card;
 import com.mindworkouts.org.appeltres.Model.Player;
 import com.mindworkouts.org.appeltres.View.Render;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -23,15 +24,21 @@ public class Controller {
     private boolean showingHand;
     private Network net;
     private ArrayList<Card> heap;
+    private ArrayList<Card> leftTableCards;
+    private ArrayList<Card> rightTableCards;
+    private int [] tableValues;//leftoright
     private ArrayList<Card> drawingCards;
+    private ArrayList<Player> secondaryPlayers;
     private boolean playedCard;
     private int estadoAnterior;
-    public Controller(Context context){
+    public Controller(Context context, Render render){
         this.context = context;
         this.logic = new Logic();
-        render=null;
+        this.render=render;
         showingHand = false;
+        this.tableValues = new int[]{3,2,9,6,11,12};
         createPlayer();
+        initDrawingCards();
         //wait network()
         //refreshStatus
         //updateGame
@@ -41,13 +48,40 @@ public class Controller {
     private void initDrawingCards(){
         drawingCards = new ArrayList<Card>();
         int [] degrees = {355,0,5};
+        Card card;
         for (int i = 0; i < 3; i++){
-            Card card = new Card(Constants.CARD_TABLE_WIDTH,Constants.CARD_TABLE_HEIGTH,Constants.DRAW_CARDS_X,Constants.DRAW_CARDS_Y, 0);
+            card = new Card(Constants.CARD_TABLE_WIDTH,Constants.CARD_TABLE_HEIGTH,Constants.DRAW_CARDS_X,Constants.DRAW_CARDS_Y, 0);
             card.setDegrees(degrees[i]);
             card.updateMatrix();
             this.drawingCards.add(card);
         }
+        leftTableCards = new ArrayList<Card>();
+        int [] translations = {0};
+        for (int i = 0 ; i < 3 ; i ++){
+            card = new Card(Constants.CARD_FINAL_WIDTH,Constants.CARD_FINAL_HEIGTH,Constants.tableCards[1][i].x,Constants.tableCards[1][i].y, this.tableValues[i]);
+            card.setDegrees(270);;
+            card.updateMatrix();
+            this.leftTableCards.add(card);
+        }
+        secondaryPlayers.add(new Player(leftTableCards,1));
+        rightTableCards = new ArrayList<Card>();
+        for (int i = 0 ; i < 3 ; i ++){
+            card = new Card(Constants.CARD_FINAL_WIDTH,Constants.CARD_FINAL_HEIGTH,Constants.tableCards[2][i].x,Constants.tableCards[2][i].y, this.tableValues[i+3]);
+            card.setDegrees(270);
+            card.updateMatrix();
+            this.rightTableCards.add(card);
+        }
+        secondaryPlayers.add(new Player(rightTableCards,2));
     }
+
+    public ArrayList<Card> getTableCards() {
+        ArrayList<Card> table = new ArrayList<Card>();
+        table.addAll(this.leftTableCards);
+        table.addAll(this.rightTableCards);
+        table.addAll(this.mainPlayer.getTableCards());
+        return table;
+    }
+
     public ArrayList<Card> getDrawingCards(){return this.drawingCards;}
     public void setTurn(boolean isTurn){
         mainPlayer.setTurn(isTurn);
@@ -70,6 +104,7 @@ public class Controller {
         if(!markPlayables()){
             playerEatHeap();
         }
+        //sortHand();
         mainPlayer.setTurn(true);
     }
 
@@ -102,6 +137,9 @@ public class Controller {
     }
 
     public void playerEatHeap(){
+      //TODO: NOT WORKING ADALL
+        //  mainPlayer.addAll(heap);
+       // heap.clear();
         ArrayList<Card> allHand =getAllPlayerHand();
         ArrayList<Integer> sortedValues = new ArrayList<Integer>();
         allHand.addAll(this.heap);
@@ -149,9 +187,13 @@ public class Controller {
     }
     public void createPlayer(){
         ArrayList<Integer> values = new ArrayList<Integer>();
+        ArrayList<Integer> tableVals= new ArrayList<Integer>();
         int [] vals = {1,4,3,6,8,10,11,12,13};
         for(int i = 0 ; i < vals.length; i++){values.add(vals[i]);}
-        this.mainPlayer = new Player(values);
+        vals= new int[]{3,4,10};
+        for(int i = 0 ; i < vals.length; i++){tableVals.add(vals[i]);}
+        this.mainPlayer = new Player(values,tableVals);
+        this.secondaryPlayers = new ArrayList<Player>();
         heap = new ArrayList<Card>();
     }
     public void setRender(Render render){
@@ -267,6 +309,9 @@ public class Controller {
         return heap;
     }
     public int getTouchCardPointer(){return this.touchCardPointer;}
+    public void sortHand(){
+        mainPlayer.sortHand();
+    }
     public void drawCard(){
         if(mainPlayer.getAllCards().size()<3){
             mainPlayer.addCard(1+new Random().nextInt(13));
@@ -308,6 +353,7 @@ public class Controller {
                     if (trigger.intersect(card.getPositionX() - card.getWidth() / triggerEpsilon, card.getPositionY() - card.getHeight() / triggerEpsilon, card.getPositionX() + card.getWidth() / triggerEpsilon, card.getPositionY() + card.getHeight() / triggerEpsilon)) {
                         card.setNextXPosition(card.getStaticX());
                         card.setNextYPosition(card.getStaticY());
+                 //       card.setValue(card.getStaticValue());
                         card.updateMatrix();
                     } else {
                         double[] d = Constants.normalize(card.getPositionX() - card.getStaticX(), card.getPositionY() - card.getStaticY());

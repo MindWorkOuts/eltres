@@ -10,6 +10,8 @@ import com.mindworkouts.org.appeltres.Constants;
 
     public class Card extends Entity{
         private int value = 0;
+
+        private int staticValue = 0;
         private int staticX = 0;
         private int staticY = 0;
         private boolean focusing = false;
@@ -25,9 +27,18 @@ import com.mindworkouts.org.appeltres.Constants;
             this.setNextYPosition(staticY);
             super.setSpeed(Constants.INITIAL_CARD_SPEED);
             this.value = value;
+            this.staticValue = value;
             cardMatrix = new Matrix();
             degrees = 0;
             rotated = 0;
+        }
+
+        public int getStaticValue() {
+            return staticValue;
+        }
+
+        public void setStaticValue(int staticValue) {
+            this.staticValue = staticValue;
         }
 
         public void setCardMatrix(Matrix cardMatrix) {

@@ -1,6 +1,7 @@
 package com.mindworkouts.org.appeltres;
 
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 
 import java.util.ArrayList;
@@ -18,10 +19,14 @@ public class Constants {
     public static int SCREEN_WIDTH;
     public static int SCREEN_HEIGTH;
     public static Rect HEAP_RECT;
-    public static int CARD_HEIGTH = 250;
-    public static int CARD_WIDTH = 192;
-    public static int CARD_TABLE_HEIGTH = 188;
-    public static int CARD_TABLE_WIDTH = 144;
+    /*Constants.CARD_HEIGTH = Constants.SCREEN_HEIGTH/3;
+    Constants.CARD_WIDTH = (int)(Constants.CARD_HEIGTH/1.33333);*/
+    public static int CARD_HEIGTH;
+    public static int CARD_WIDTH;
+    public static int CARD_TABLE_HEIGTH;
+    public static int CARD_TABLE_WIDTH ;
+    public static int CARD_FINAL_HEIGTH;
+    public static int CARD_FINAL_WIDTH;
     public static int HEAP_DEGREES= 0;
     public static final int HEAP_MAX_DEGREES= 30;
     public static final int HEAP_MIN_DEGREES= 0;
@@ -107,4 +112,14 @@ public class Constants {
     public static int DRAW_CARDS_Y;
     public static int HEAP_CARDS_X;
     public static int HEAP_CARDS_Y;
+    //[0][0] 0 center carta 1
+    //[0][1] 0 center carta 2
+    //[0][2] 0 center carta 3
+    //[1][0] 0 left carta 1
+    //[1][1] 0 left carta 2
+    //[1][2] 0 left carta 3
+    //[2][0] 0 right carta 1
+    //[2][1] 0 right carta 2
+    //[2][2] 0 right carta 3
+    public static Point[][] tableCards;
 }

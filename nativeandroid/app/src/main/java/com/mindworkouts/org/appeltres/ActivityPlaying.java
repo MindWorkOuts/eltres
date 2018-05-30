@@ -4,6 +4,7 @@ package com.mindworkouts.org.appeltres;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
@@ -58,6 +59,10 @@ public class ActivityPlaying extends Activity implements
             Constants.SCREEN_WIDTH_TOTAL = x;
             Constants.SCREEN_HEIGTH = y;
             Constants.SCREEN_WIDTH = x;
+            Constants.CARD_HEIGTH = Constants.SCREEN_HEIGTH/3;
+            Constants.CARD_WIDTH = (int)(Constants.CARD_HEIGTH/1.33333);
+
+
             int xTranslation = (int)(0.8*Constants.CARD_WIDTH);
             int yTranslation = (int)(0.07*Constants.CARD_HEIGTH);
             int [][] pos= {
@@ -97,25 +102,96 @@ public class ActivityPlaying extends Activity implements
 
             Constants.HAND_CARDS_XY_UNSEEN= posHidden;
             Constants.HAND_PANEL = new Rect(Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH/2,Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL);
-            Constants.HEAP_RECT = new Rect(Constants.CARD_WIDTH, Constants.CARD_HEIGTH/4, Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH, Constants.SCREEN_HEIGTH_TOTAL/2);
-            Constants.HEAP_CARDS_X = Constants.HEAP_RECT.centerX()+Constants.CARD_TABLE_WIDTH/2;
-            Constants.HEAP_CARDS_Y = Constants.HEAP_RECT.centerY()-Constants.CARD_TABLE_HEIGTH/2;
-            Constants.DRAW_CARDS_X = Constants.HEAP_RECT.centerX()-2*Constants.CARD_TABLE_WIDTH/2;
-            Constants.DRAW_CARDS_Y = Constants.HEAP_RECT.centerY()-Constants.CARD_TABLE_HEIGTH/2;
+            Constants.HEAP_RECT = new Rect(Constants.CARD_WIDTH, 0, Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH, Constants.SCREEN_HEIGTH_TOTAL/2);
+
+//            Constants.CARD_TABLE_WIDTH = 3*Constants.CARD_WIDTH/4;//75%
+//            Constants.CARD_TABLE_HEIGTH= 3*Constants.CARD_HEIGTH/4;
+
+            Constants.CARD_TABLE_WIDTH = 2*Constants.CARD_WIDTH/3;//75%
+            Constants.CARD_TABLE_HEIGTH= 2*Constants.CARD_HEIGTH/3;
+
+            Constants.CARD_FINAL_WIDTH= 2*Constants.CARD_WIDTH/3;//66%
+            Constants.CARD_FINAL_HEIGTH= 2*Constants.CARD_HEIGTH/3;
+
+            Constants.HEAP_CARDS_X = Constants.HEAP_RECT.centerX()+Constants.CARD_TABLE_WIDTH/6;
+            Constants.HEAP_CARDS_Y = Constants.HEAP_RECT.centerY()-Constants.CARD_TABLE_HEIGTH/4;
+
+            Constants.DRAW_CARDS_X = Constants.HEAP_RECT.centerX()-Constants.CARD_TABLE_WIDTH-Constants.CARD_TABLE_WIDTH/6;
+            Constants.DRAW_CARDS_Y = Constants.HEAP_RECT.centerY()-Constants.CARD_TABLE_HEIGTH/4;
 
 
+
+            initTableCardsPositions();
             initVariables();
             setContentView(render);
             controller.initMatrixs();
+        }
+        private void initTableCardsPositions(){
+            Constants.tableCards = new Point[3][3];
+            Point point;
+            int tabulate = (int)(Constants.CARD_WIDTH*0.1f);
+            int staticAlignment = Constants.SCREEN_HEIGTH_TOTAL/2+Constants.CARD_FINAL_HEIGTH/2;
+
+
+            //CENTER
+
+            point = new Point();
+            point.x = Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_FINAL_WIDTH/2;
+            point.y =  staticAlignment;
+            Constants.tableCards[0][0] = point;//centercenter
+
+            point = new Point();
+            point.x = Constants.tableCards[0][0].x -Constants.CARD_FINAL_WIDTH -tabulate;
+            point.y =  staticAlignment;
+            Constants.tableCards[0][1] = point;//centerleft
+
+            point = new Point();
+            point.x = Constants.SCREEN_WIDTH_TOTAL/2+Constants.CARD_FINAL_WIDTH/2+tabulate;
+            point.y =  staticAlignment;
+            Constants.tableCards[0][2] = point;//centerright
+
+            //LEFT
+
+            staticAlignment = Constants.tableCards[0][2].y-tabulate;
+
+            point = new Point();
+            point.y =  staticAlignment+Constants.CARD_FINAL_WIDTH;
+            point.x = (int)(Constants.CARD_FINAL_WIDTH*3);
+            Constants.tableCards[1][0] = point;//rightright
+
+            point = new Point();
+            point.y =  Constants.tableCards[1][0].y-Constants.CARD_FINAL_WIDTH-tabulate;
+            point.x =Constants.tableCards[1][0].x;
+            Constants.tableCards[1][1] = point;//rightright
+
+            point = new Point();
+            point.x =Constants.tableCards[1][1].x;
+            point.y =  Constants.tableCards[1][1].y-Constants.CARD_FINAL_WIDTH-tabulate;
+            Constants.tableCards[1][2] = point;//rightright
+            //RIGHT
+            point = new Point();
+            point.x = Constants.SCREEN_WIDTH_TOTAL-Constants.tableCards[1][2].x+Constants.CARD_TABLE_HEIGTH;
+            point.y = Constants.tableCards[1][0].y;
+            Constants.tableCards[2][0] = point;//rightright
+
+            point = new Point();
+            point.x = Constants.SCREEN_WIDTH_TOTAL-Constants.tableCards[1][2].x+Constants.CARD_TABLE_HEIGTH;
+            point.y = Constants.tableCards[1][1].y;
+            Constants.tableCards[2][1] = point;//centerright
+
+            point = new Point();
+            point.x = Constants.SCREEN_WIDTH_TOTAL-Constants.tableCards[1][2].x+Constants.CARD_TABLE_HEIGTH;
+            point.y = Constants.tableCards[1][2].y;
+            Constants.tableCards[2][2] = point;//centerright
         }
 
         private void initVariables() {
             thread=null;
             render=null;
             System.gc();
-            controller = new Controller(getApplicationContext());
-            render = new Render(this.getApplicationContext(), controller);
-            controller.setRender(render);
+            render = new Render(this.getApplicationContext());
+            controller = new Controller(getApplicationContext(), render);
+            render.setController(controller);
             this.thread = new MainThread(this.render.getHolder(), this.render, this, controller);
             this.thread.setRunning(true);
             this.thread.start();
@@ -170,9 +246,6 @@ public class ActivityPlaying extends Activity implements
             Constants.HAND_CARDS_XY_UNSEEN= posHidden;
             Constants.HAND_PANEL = new Rect(Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH/2,Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL);
             Constants.HEAP_RECT = new Rect(Constants.CARD_WIDTH, Constants.CARD_HEIGTH/4, Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH, Constants.SCREEN_HEIGTH_TOTAL/2);
-
-
-
             initVariables();
             setContentView(render);
             controller.initMatrixs();

@@ -24,16 +24,20 @@ public class Render extends SurfaceView {
 
     private ArrayList<Bitmap> cardsBitmap = new ArrayList<Bitmap>();
     private Bitmap background;
-    private Paint color = new Paint();
+    private Paint color, opac;
     private Controller controller;
 
 
-    public Render(Context context, Controller controller) {
+    public Render(Context context) {
         super(context);
+        opac = new Paint(Color.BLACK);
+        opac.setAlpha(100);
+        color = new Paint();
         this.initBitmaps();
         this.setBitmapDims();
+    }
+    public void setController(Controller controller){
         this.controller = controller;
-
     }
     public void draw(Canvas canvas, Point p) {
         canvas.drawBitmap(this.background,new Rect(0,0,background.getWidth(),background.getHeight()),new Rect(0,0, Constants.SCREEN_WIDTH_TOTAL,Constants.SCREEN_HEIGTH_TOTAL),color);
@@ -42,10 +46,64 @@ public class Render extends SurfaceView {
         canvas.drawLine(Constants.HEAP_RECT.left,Constants.HEAP_RECT.top,Constants.HEAP_RECT.left,Constants.HEAP_RECT.bottom, color);
         canvas.drawLine(Constants.HEAP_RECT.right,Constants.HEAP_RECT.top,Constants.HEAP_RECT.right,Constants.HEAP_RECT.bottom, color);
         canvas.drawLine(Constants.HEAP_RECT.left,Constants.HEAP_RECT.bottom,Constants.HEAP_RECT.right,Constants.HEAP_RECT.bottom, color);
+
+        canvas.drawLine(Constants.HEAP_RECT.centerX(),0,Constants.HEAP_RECT.centerX(),Constants.HEAP_RECT.bottom, color);
+/*
+
+        int x = Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_FINAL_WIDTH/2;
+        int y = Constants.SCREEN_HEIGTH_TOTAL/2+Constants.CARD_FINAL_HEIGTH/2;
+        int r = Constants.SCREEN_WIDTH_TOTAL/2+Constants.CARD_FINAL_WIDTH/2;
+        int b = y + Constants.CARD_FINAL_HEIGTH;
+        Rect rect = new Rect(x,y,r,b);
+        int separacion = (int)(Constants.CARD_TABLE_WIDTH*0.1f);
+        canvas.drawBitmap(cardsBitmap.get(1),new Rect(0,0,cardsBitmap.get(1).getWidth(),cardsBitmap.get(1).getHeight()),rect, color);
+        x = Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_FINAL_WIDTH-Constants.CARD_FINAL_WIDTH/2-separacion;
+        y = Constants.SCREEN_HEIGTH_TOTAL/2+Constants.CARD_FINAL_HEIGTH/2;
+        r = x+Constants.CARD_FINAL_WIDTH;
+        b = y + Constants.CARD_FINAL_HEIGTH;
+        rect = new Rect(x,y,r,b);
+        canvas.drawBitmap(cardsBitmap.get(1),new Rect(0,0,cardsBitmap.get(1).getWidth(),cardsBitmap.get(1).getHeight()),rect, color);
+
+        x = Constants.SCREEN_WIDTH_TOTAL/2+Constants.CARD_FINAL_WIDTH/2+separacion;
+        y = Constants.SCREEN_HEIGTH_TOTAL/2+Constants.CARD_FINAL_HEIGTH/2;
+        r = x+Constants.CARD_FINAL_WIDTH;
+        b = y + Constants.CARD_FINAL_HEIGTH;
+        rect = new Rect(x,y,r,b);
+        canvas.drawBitmap(cardsBitmap.get(1),new Rect(0,0,cardsBitmap.get(1).getWidth(),cardsBitmap.get(1).getHeight()),rect, color);
+
+        //LEFT
+        x = Constants.HEAP_RECT.left-Constants.CARD_FINAL_HEIGTH;
+        y = Constants.SCREEN_HEIGTH_TOTAL/2-Constants.CARD_FINAL_WIDTH - Constants.CARD_FINAL_WIDTH/2 -separacion;
+        r = x+Constants.CARD_FINAL_HEIGTH;
+        b = y + Constants.CARD_FINAL_WIDTH;
+        rect = new Rect(x,y,r,b);
+        canvas.drawRect(rect, color);
+
+        x = Constants.HEAP_RECT.left-Constants.CARD_FINAL_HEIGTH;
+        y = Constants.SCREEN_HEIGTH_TOTAL/2 -Constants.CARD_FINAL_WIDTH/2;
+        r = x+Constants.CARD_FINAL_HEIGTH;
+        b = y + Constants.CARD_FINAL_WIDTH;
+        rect = new Rect(x,y,r,b);
+        canvas.drawRect(rect, color);
+
+        x = Constants.HEAP_RECT.left-Constants.CARD_FINAL_HEIGTH;
+        y = Constants.SCREEN_HEIGTH_TOTAL/2 + Constants.CARD_FINAL_WIDTH/2 + separacion;
+        r = x+Constants.CARD_FINAL_HEIGTH;
+        b = y + Constants.CARD_FINAL_WIDTH;
+        rect = new Rect(x,y,r,b);
+        canvas.drawRect(rect, color);
+*/
         ArrayList<Card> cards;
         Card card;
         Bitmap bitmapCard;
         int i;
+        cards = controller.getTableCards();
+        for (i = 0; i < cards.size(); i++){
+            card = cards.get(i);
+            bitmapCard = this.cardsBitmap.get(card.getValue());
+            canvas.drawBitmap(bitmapCard,card.getCardMatrix(), card.getPaint());
+        }
+
         cards = controller.getDrawingCards();
         for(i = 0; i < cards.size(); i++){
             card = cards.get(i);
@@ -59,6 +117,7 @@ public class Render extends SurfaceView {
             bitmapCard = this.cardsBitmap.get(card.getValue());
             canvas.drawBitmap(bitmapCard,card.getCardMatrix(), card.getPaint());
         }
+
         cards = controller.getVisiblePlayerHand();
         for (i = 0; i < cards.size() && i < Constants.MAX_CARDS_SEEN; i++){
             card = cards.get(i);
