@@ -3,7 +3,9 @@ package com.mindworkouts.org.appeltres;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -51,6 +53,10 @@ public class ActivityPlaying extends Activity implements
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            initGameContent();
+        }
+        private void initGameContent(){
+
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int y = displayMetrics.heightPixels;
@@ -95,10 +101,10 @@ public class ActivityPlaying extends Activity implements
             Constants.HAND_CARDS_XY = pos;
             int posHidden[][] =   {
                     {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,
-                    Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH},
+                            Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH},
 
                     {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,
-                    Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH}};
+                            Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH}};
 
             Constants.HAND_CARDS_XY_UNSEEN= posHidden;
             Constants.HAND_PANEL = new Rect(Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH/2,Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL);
@@ -118,13 +124,43 @@ public class ActivityPlaying extends Activity implements
 
             Constants.DRAW_CARDS_X = Constants.HEAP_RECT.centerX()-Constants.CARD_TABLE_WIDTH-Constants.CARD_TABLE_WIDTH/6;
             Constants.DRAW_CARDS_Y = Constants.HEAP_RECT.centerY()-Constants.CARD_TABLE_HEIGTH/4;
-
-
-
             initTableCardsPositions();
+            initIconsPositions();
             initVariables();
             setContentView(render);
             controller.initMatrixs();
+        }
+        private void initIconsPositions(){
+            Constants.USERS_ICON_RECT = new Rect[3];
+            Constants.HAND_ICON_RECT = new Rect[3];
+            Constants.USERS_ICON_WIDTH = Constants.SCREEN_HEIGTH_TOTAL/6;
+            Constants.HAND_ICON_WIDTH = Constants.SCREEN_WIDTH_TOTAL/16;
+            Constants.HAND_ICON_HEIGTH = Constants.SCREEN_HEIGTH_TOTAL/8;
+            Constants.USERS_ICON_RECT[0] = new Rect(Constants.SCREEN_WIDTH_TOTAL/14,3*Constants.SCREEN_HEIGTH_TOTAL/4,Constants.SCREEN_WIDTH_TOTAL/14 + Constants.USERS_ICON_WIDTH,3*Constants.SCREEN_HEIGTH_TOTAL/4 + Constants.USERS_ICON_WIDTH);
+            Constants.USERS_ICON_RECT[1] = new Rect(Constants.SCREEN_WIDTH_TOTAL/35,Constants.SCREEN_HEIGTH_TOTAL/4,Constants.SCREEN_WIDTH_TOTAL/35 + Constants.USERS_ICON_WIDTH ,Constants.SCREEN_HEIGTH_TOTAL/4+Constants.USERS_ICON_WIDTH );
+            Constants.USERS_ICON_RECT[2] = new Rect(Constants.SCREEN_WIDTH_TOTAL-Constants.USERS_ICON_RECT[1].right,Constants.USERS_ICON_RECT[1].top,Constants.SCREEN_WIDTH_TOTAL-Constants.USERS_ICON_RECT[1].left,Constants.USERS_ICON_RECT[1].bottom);
+
+            for(int i = 0 ; i < 3 ; i++){
+                Constants.HAND_ICON_RECT[i] = new Rect(Constants.USERS_ICON_RECT[i].centerX()  ,Constants.USERS_ICON_RECT[i].top + 3*Constants.USERS_ICON_WIDTH/4 ,Constants.USERS_ICON_RECT[i].centerX() +Constants.HAND_ICON_WIDTH ,Constants.USERS_ICON_RECT[i].top + 3*Constants.USERS_ICON_WIDTH/4+Constants.HAND_ICON_HEIGTH);
+            }
+
+
+            Constants.OPT_BUTTON_INGAME_BITMAP = BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.optbutton01);
+            Constants.CHK_BUTTON_BITMAP= BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.checkbutton01);
+            Constants.HAND_ICON_DEFAULT_BITMAP= BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.handicon01);
+            Constants.USERS_ICON_DEFAULT_BITMAP= BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.avatar01);
+            Constants.MONEY_BOX_BITMAP= BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.moneybox01);
+
+            int optButtonW = 3*Constants.SCREEN_WIDTH_TOTAL/28;
+            int optButtonH = Constants.SCREEN_HEIGTH_TOTAL/12;
+            Constants.CHECK_ICON_RECT = new Rect(6*Constants.SCREEN_WIDTH_TOTAL/7,Constants.SCREEN_HEIGTH_TOTAL-Constants.SCREEN_HEIGTH_TOTAL/30-optButtonH,6*Constants.SCREEN_WIDTH_TOTAL/7+optButtonW,Constants.SCREEN_HEIGTH_TOTAL-Constants.SCREEN_HEIGTH_TOTAL/30);
+
+            Constants.OPT_BUTTON_INGAME_RECT = new Rect(6*Constants.SCREEN_WIDTH_TOTAL/7,Constants.SCREEN_HEIGTH_TOTAL/30,6*Constants.SCREEN_WIDTH_TOTAL/7+optButtonW,Constants.SCREEN_HEIGTH_TOTAL/30+optButtonH);
+
+            Constants.HAND_ICON_TEXT_SIZE = Constants.SCREEN_WIDTH_TOTAL/50;
+
+            Constants.MONEY_BOX_RECT = new Rect(Constants.USERS_ICON_RECT[1].left, Constants.OPT_BUTTON_INGAME_RECT.top, 2*(Constants.OPT_BUTTON_INGAME_RECT.right - Constants.OPT_BUTTON_INGAME_RECT.left), Constants.OPT_BUTTON_INGAME_RECT.bottom );
+
         }
         private void initTableCardsPositions(){
             Constants.tableCards = new Point[3][3];
@@ -198,62 +234,12 @@ public class ActivityPlaying extends Activity implements
         }
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            int y = displayMetrics.heightPixels;
-            int x = displayMetrics.widthPixels;
-            Constants.SCREEN_HEIGTH_TOTAL = y;
-            Constants.SCREEN_WIDTH_TOTAL = x;
-            Constants.SCREEN_HEIGTH = y;
-            Constants.SCREEN_WIDTH = x;
-            int xTranslation = (int)(0.8*Constants.CARD_WIDTH);
-            int yTranslation = (int)(0.07*Constants.CARD_HEIGTH);
-            int [][] pos= {
-                    //IZQUIERDA MAX
-                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,(int)(
-                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
-
-                    //CENTRO IZQUIERDA
-                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation) ,(int)(
-                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
-
-                    //CENTRO
-                    {Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_WIDTH/2,(int)(
-                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR)},
-
-                    //CENTRO DERECHA
-                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2,(int)(
-                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR-yTranslation)},
-
-                    //DERECHA MAX, SI HAY MÁS DE 4 CARTAS
-                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,(int)(
-                            Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH*Constants.HIDDING_CARDS_FACTOR-yTranslation/2)}
-            };
-            Constants.HAND_CARDS_XY_SHOWING = new int[5][2];
-            for(int i = 0; i < pos.length; i++){
-                Constants.HAND_CARDS_XY_SHOWING[i][0]=pos[i][0];
-                Constants.HAND_CARDS_XY_SHOWING[i][1]=pos[i][1]-Constants.CARD_HEIGTH/4;
-            }
-
-            Constants.HAND_CARDS_XY = pos;
-            int posHidden[][] =   {
-                    {Constants.SCREEN_WIDTH_TOTAL/2 - Constants.CARD_WIDTH/2 - (xTranslation)*2,
-                            Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH},
-
-                    {Constants.SCREEN_WIDTH_TOTAL/2 + Constants.CARD_WIDTH/2 + xTranslation,
-                            Constants.SCREEN_HEIGTH_TOTAL+Constants.CARD_HEIGTH}};
-
-            Constants.HAND_CARDS_XY_UNSEEN= posHidden;
-            Constants.HAND_PANEL = new Rect(Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL-Constants.CARD_HEIGTH/2,Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH,Constants.SCREEN_HEIGTH_TOTAL);
-            Constants.HEAP_RECT = new Rect(Constants.CARD_WIDTH, Constants.CARD_HEIGTH/4, Constants.SCREEN_WIDTH_TOTAL-Constants.CARD_WIDTH, Constants.SCREEN_HEIGTH_TOTAL/2);
-            initVariables();
-            setContentView(render);
-            controller.initMatrixs();
+          initGameContent();
         }
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
+            initGameContent();
         }
 
 
@@ -268,8 +254,28 @@ public class ActivityPlaying extends Activity implements
                 }
             }
         }
-        public boolean isClickDone(){return this.clickDone;}
-        public boolean isTouchingHandPanel(){
+    public boolean isClickDone(){return this.clickDone;}
+    public boolean isOptionsClicked(){
+        if (!this.clickDone)return false;
+        if (Constants.OPT_BUTTON_INGAME_RECT.contains((int)currentX,(int)currentY))
+            return true;
+        return false;
+    }
+    public boolean isProfileClicked(){
+        if (!this.clickDone)return false;
+        if (Constants.USERS_ICON_RECT[0].contains((int)currentX,(int)currentY))
+            return true;
+        return false;
+    }
+    public int isEnemyProfileClicked(){
+        if (!this.clickDone)return -1;
+        for(int i = 1; i < Constants.NUM_PLAYERS; i++)
+            if (Constants.USERS_ICON_RECT[i].contains((int)currentX,(int)currentY))
+                return i;
+        return -1;
+    }
+
+    public boolean isTouchingHandPanel(){
             boolean isTouching = Constants.HAND_PANEL.contains((int)this.lastDownX,(int)this.lastDownY);
             if(isTouching)this.isShowingHand=true;
             return isTouching;
@@ -381,7 +387,6 @@ public class ActivityPlaying extends Activity implements
 
         @Override
         protected void onPause() {
-
             super.onPause();
         }
 

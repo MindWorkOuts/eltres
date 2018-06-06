@@ -25,6 +25,7 @@ public class Render extends SurfaceView {
     private ArrayList<Bitmap> cardsBitmap = new ArrayList<Bitmap>();
     private Bitmap background;
     private Paint color, opac;
+    private Paint handIconText;
     private Controller controller;
 
 
@@ -33,6 +34,9 @@ public class Render extends SurfaceView {
         opac = new Paint(Color.BLACK);
         opac.setAlpha(100);
         color = new Paint();
+        handIconText = new Paint();
+        handIconText.setColor(Color.WHITE);
+        handIconText.setTextSize(Constants.HAND_ICON_TEXT_SIZE);
         this.initBitmaps();
         this.setBitmapDims();
     }
@@ -41,57 +45,15 @@ public class Render extends SurfaceView {
     }
     public void draw(Canvas canvas, Point p) {
         canvas.drawBitmap(this.background,new Rect(0,0,background.getWidth(),background.getHeight()),new Rect(0,0, Constants.SCREEN_WIDTH_TOTAL,Constants.SCREEN_HEIGTH_TOTAL),color);
-        canvas.drawText(""+p.x+":"+p.y,Constants.SCREEN_WIDTH_TOTAL/2,Constants.SCREEN_HEIGTH_TOTAL/2,color);
+
+
+/*
         canvas.drawLine(Constants.HEAP_RECT.left,Constants.HEAP_RECT.top,Constants.HEAP_RECT.right,Constants.HEAP_RECT.top, color);
         canvas.drawLine(Constants.HEAP_RECT.left,Constants.HEAP_RECT.top,Constants.HEAP_RECT.left,Constants.HEAP_RECT.bottom, color);
         canvas.drawLine(Constants.HEAP_RECT.right,Constants.HEAP_RECT.top,Constants.HEAP_RECT.right,Constants.HEAP_RECT.bottom, color);
         canvas.drawLine(Constants.HEAP_RECT.left,Constants.HEAP_RECT.bottom,Constants.HEAP_RECT.right,Constants.HEAP_RECT.bottom, color);
 
         canvas.drawLine(Constants.HEAP_RECT.centerX(),0,Constants.HEAP_RECT.centerX(),Constants.HEAP_RECT.bottom, color);
-/*
-
-        int x = Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_FINAL_WIDTH/2;
-        int y = Constants.SCREEN_HEIGTH_TOTAL/2+Constants.CARD_FINAL_HEIGTH/2;
-        int r = Constants.SCREEN_WIDTH_TOTAL/2+Constants.CARD_FINAL_WIDTH/2;
-        int b = y + Constants.CARD_FINAL_HEIGTH;
-        Rect rect = new Rect(x,y,r,b);
-        int separacion = (int)(Constants.CARD_TABLE_WIDTH*0.1f);
-        canvas.drawBitmap(cardsBitmap.get(1),new Rect(0,0,cardsBitmap.get(1).getWidth(),cardsBitmap.get(1).getHeight()),rect, color);
-        x = Constants.SCREEN_WIDTH_TOTAL/2-Constants.CARD_FINAL_WIDTH-Constants.CARD_FINAL_WIDTH/2-separacion;
-        y = Constants.SCREEN_HEIGTH_TOTAL/2+Constants.CARD_FINAL_HEIGTH/2;
-        r = x+Constants.CARD_FINAL_WIDTH;
-        b = y + Constants.CARD_FINAL_HEIGTH;
-        rect = new Rect(x,y,r,b);
-        canvas.drawBitmap(cardsBitmap.get(1),new Rect(0,0,cardsBitmap.get(1).getWidth(),cardsBitmap.get(1).getHeight()),rect, color);
-
-        x = Constants.SCREEN_WIDTH_TOTAL/2+Constants.CARD_FINAL_WIDTH/2+separacion;
-        y = Constants.SCREEN_HEIGTH_TOTAL/2+Constants.CARD_FINAL_HEIGTH/2;
-        r = x+Constants.CARD_FINAL_WIDTH;
-        b = y + Constants.CARD_FINAL_HEIGTH;
-        rect = new Rect(x,y,r,b);
-        canvas.drawBitmap(cardsBitmap.get(1),new Rect(0,0,cardsBitmap.get(1).getWidth(),cardsBitmap.get(1).getHeight()),rect, color);
-
-        //LEFT
-        x = Constants.HEAP_RECT.left-Constants.CARD_FINAL_HEIGTH;
-        y = Constants.SCREEN_HEIGTH_TOTAL/2-Constants.CARD_FINAL_WIDTH - Constants.CARD_FINAL_WIDTH/2 -separacion;
-        r = x+Constants.CARD_FINAL_HEIGTH;
-        b = y + Constants.CARD_FINAL_WIDTH;
-        rect = new Rect(x,y,r,b);
-        canvas.drawRect(rect, color);
-
-        x = Constants.HEAP_RECT.left-Constants.CARD_FINAL_HEIGTH;
-        y = Constants.SCREEN_HEIGTH_TOTAL/2 -Constants.CARD_FINAL_WIDTH/2;
-        r = x+Constants.CARD_FINAL_HEIGTH;
-        b = y + Constants.CARD_FINAL_WIDTH;
-        rect = new Rect(x,y,r,b);
-        canvas.drawRect(rect, color);
-
-        x = Constants.HEAP_RECT.left-Constants.CARD_FINAL_HEIGTH;
-        y = Constants.SCREEN_HEIGTH_TOTAL/2 + Constants.CARD_FINAL_WIDTH/2 + separacion;
-        r = x+Constants.CARD_FINAL_HEIGTH;
-        b = y + Constants.CARD_FINAL_WIDTH;
-        rect = new Rect(x,y,r,b);
-        canvas.drawRect(rect, color);
 */
         ArrayList<Card> cards;
         Card card;
@@ -125,6 +87,17 @@ public class Render extends SurfaceView {
             canvas.drawBitmap(bitmapCard,card.getCardMatrix(), card.getPaint());
         }
 
+        canvas.drawBitmap(Constants.OPT_BUTTON_INGAME_BITMAP,new Rect(0,0,Constants.OPT_BUTTON_INGAME_BITMAP.getWidth(),Constants.OPT_BUTTON_INGAME_BITMAP.getHeight()),Constants.OPT_BUTTON_INGAME_RECT,color);
+        canvas.drawBitmap(Constants.CHK_BUTTON_BITMAP,new Rect(0,0,Constants.CHK_BUTTON_BITMAP.getWidth(),Constants.CHK_BUTTON_BITMAP.getHeight()),Constants.CHECK_ICON_RECT,color);
+        canvas.drawBitmap(Constants.MONEY_BOX_BITMAP, new Rect(0,0,Constants.MONEY_BOX_BITMAP.getWidth(),Constants.MONEY_BOX_BITMAP.getHeight()),Constants.MONEY_BOX_RECT, color);
+        for(i = 0 ; i < Constants.NUM_PLAYERS; i ++) {
+            canvas.drawBitmap(Constants.USERS_ICON_DEFAULT_BITMAP, new Rect(0, 0, Constants.USERS_ICON_DEFAULT_BITMAP.getWidth(), Constants.USERS_ICON_DEFAULT_BITMAP.getHeight()), Constants.USERS_ICON_RECT[i], color);
+            canvas.drawBitmap(Constants.HAND_ICON_DEFAULT_BITMAP, new Rect(0, 0, Constants.HAND_ICON_DEFAULT_BITMAP.getWidth(), Constants.HAND_ICON_DEFAULT_BITMAP.getHeight()), Constants.HAND_ICON_RECT[i], color);
+            int size = 0;
+            if(i==0)
+                size = controller.getAllPlayerHand().size();
+            canvas.drawText(""+size,Constants.HAND_ICON_RECT[i].left+(Constants.HAND_ICON_RECT[i].right- Constants.HAND_ICON_RECT[i].left)/3,Constants.HAND_ICON_RECT[i].centerY()+handIconText.getTextSize()/2,handIconText);
+        }
     }
     public void setBitmapDims(){
         Constants.BITMAP_CARDS_SIZE = new int[cardsBitmap.size()][2];

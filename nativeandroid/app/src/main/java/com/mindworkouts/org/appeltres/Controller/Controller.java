@@ -179,16 +179,17 @@ public class Controller {
         int finalValue = heap.get(heap.size()-1).getValue();
         switch(heap.get(heap.size()-1).getValue()){
             case 3:
-                if(heap.size()>1)
-                    finalValue = heap.get(heap.size()-2).getValue();
-                break;
+                for ( int i = heap.size()-2 ; i >= 0 ;i-- ){
+                    finalValue = heap.get(i).getValue();
+                    if(heap.get(i).getValue()!=3)break;
+                }
         }
         return logic.getForbiddenMoves()[finalValue][value]==0;
     }
     public void createPlayer(){
         ArrayList<Integer> values = new ArrayList<Integer>();
         ArrayList<Integer> tableVals= new ArrayList<Integer>();
-        int [] vals = {1,4,3,6,8,10,11,12,13};
+        int [] vals = {1,3,3,3,8,10,11,12,13};
         for(int i = 0 ; i < vals.length; i++){values.add(vals[i]);}
         vals= new int[]{3,4,10};
         for(int i = 0 ; i < vals.length; i++){tableVals.add(vals[i]);}

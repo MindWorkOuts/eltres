@@ -1,5 +1,6 @@
 package com.mindworkouts.org.appeltres;
 
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -122,4 +123,21 @@ public class Constants {
     //[2][1] 0 right carta 2
     //[2][2] 0 right carta 3
     public static Point[][] tableCards;
+    public static Rect OPT_BUTTON_INGAME_RECT;
+    public static Bitmap OPT_BUTTON_INGAME_BITMAP;
+    public static Rect [] USERS_ICON_RECT;
+    public static Rect [] HAND_ICON_RECT;
+    public static Rect CHECK_ICON_RECT;
+    public static Bitmap CHK_BUTTON_BITMAP;
+    public static int USERS_ICON_WIDTH;
+    public static Bitmap USERS_ICON_DEFAULT_BITMAP;
+    public static int HAND_ICON_WIDTH;
+    public static int HAND_ICON_HEIGTH;
+    public static int NUM_PLAYERS = 3;
+    public static Bitmap HAND_ICON_DEFAULT_BITMAP;
+    public static int HAND_ICON_TEXT_SIZE;
+    public static Rect MONEY_BOX_RECT;
+    public static Bitmap MONEY_BOX_BITMAP;
+
+
 }
